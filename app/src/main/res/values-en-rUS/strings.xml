@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">OpenDroidChat</string>
+
+    <!-- Navigation -->
+    <string name="nav_chat">Chat</string>
+    <string name="nav_models">Models</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Chat Screen -->
+    <string name="chat_input_placeholder">Type a message…</string>
+    <string name="chat_add_file">Add file</string>
+    <string name="chat_send">Send</string>
+    <string name="chat_remove_file">Remove file</string>
+    <string name="chat_scroll_to_bottom">Scroll to bottom</string>
+    <string name="chat_file_read_error">Unable to read this file or file type not supported</string>
+    <string name="chat_retry">Retry</string>
+    <string name="chat_empty_config_title">No Model Configured</string>
+    <string name="chat_empty_config_desc">Please add an LLM API instance to start chatting</string>
+    <string name="chat_empty_config_button">Go to Model Management</string>
+
+    <!-- Model Settings Screen -->
+    <string name="model_settings_title">Model Instances</string>
+    <string name="model_settings_add">Add Instance</string>
+    <string name="model_settings_empty">You haven\'t configured any models yet.\nTap the \'+\' button at the bottom right to get started.</string>
+
+    <!-- Model Edit Screen -->
+    <string name="model_edit_title_add">Add New Model</string>
+    <string name="model_edit_title_edit">Configure Instance</string>
+    <string name="model_edit_save_add">Save &amp; Enable</string>
+    <string name="model_edit_save_edit">Save Changes</string>
+    <string name="model_edit_back">Back</string>
+
+    <string name="model_edit_section_basic">Basic Info</string>
+    <string name="model_edit_display_name">Display Name</string>
+    <string name="model_edit_display_name_hint">e.g. Qwen-Max-Pro</string>
+    <string name="model_edit_provider">API Provider</string>
+
+    <string name="model_edit_section_api">API Configuration</string>
+    <string name="model_edit_model_id">Model ID</string>
+    <string name="model_edit_model_id_hint">e.g. gpt-4o</string>
+    <string name="model_edit_api_key">API Key</string>
+    <string name="model_edit_custom_url">Base URL</string>
+    <string name="model_edit_custom_url_hint">https://api.example.com/v1</string>
+
+    <string name="model_edit_section_advanced">Advanced Preferences</string>
+    <string name="model_edit_system_prompt">System Prompt</string>
+    <string name="model_edit_system_prompt_hint">Define the AI\'s identity and behavior…</string>
+    <string name="model_edit_streaming">Streaming</string>
+    <string name="model_edit_streaming_desc">Enable to see typewriter-style real-time output</string>
+
+    <string name="model_edit_thinking">Enable Thinking</string>
+    <string name="model_edit_thinking_deepseek">DeepSeek V4 Deep Thinking</string>
+    <string name="model_edit_thinking_claude">Claude Extended Thinking (Adaptive/Budget)</string>
+    <string name="model_edit_thinking_gemini">Gemini Deep Thinking</string>
+    <string name="model_edit_thinking_openai">OpenAI o-series / GPT-5 Reasoning</string>
+    <string name="model_edit_thinking_effort">Reasoning Effort</string>
+
+    <string name="model_edit_effort_low">Low</string>
+    <string name="model_edit_effort_medium">Medium</string>
+    <string name="model_edit_effort_high">High</string>
+    <string name="model_edit_effort_max">Max</string>
+    <string name="model_edit_effort_xhigh">X-High</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">App Settings</string>
+    <string name="settings_warning_nightly">Technical preview (Nightly), highly unstable. May cause data loss or unexpected crashes.</string>
+    <string name="settings_warning_beta">Pre-release version (Beta), unstable. May cause data loss.</string>
+
+    <string name="settings_section_general">General</string>
+    <string name="settings_dark_mode">Dark Mode</string>
+    <string name="settings_dark_mode_desc">Toggle the app\'s visual theme</string>
+    <string name="settings_section_language">Language</string>
+    <string name="settings_app_language">App Language</string>
+    <string name="settings_language_follow_system">Follow System</string>
+    <string name="settings_language_zh_cn">中文（简体）</string>
+    <string name="settings_language_zh_tw">中文（繁體）</string>
+    <string name="settings_language_en">English (US)</string>
+
+    <string name="settings_section_update">Updates</string>
+    <string name="settings_auto_update">Auto-check Updates</string>
+    <string name="settings_auto_update_desc">Automatically check for new versions on startup</string>
+
+    <string name="settings_section_about">Support &amp; About</string>
+    <string name="settings_about_app">About OpenDroidChat</string>
+    <string name="settings_about_app_desc">Version info, open-source licenses &amp; project details</string>
+
+    <!-- About Screen -->
+    <string name="about_title">About</string>
+    <string name="about_back">Back</string>
+    <string name="about_app_name">OpenDroidChat</string>
+    <string name="about_app_desc">A pure LLM API chat client. Built with Material 3 Expressive design, delivering a productive and visually delightful experience.</string>
+    <string name="about_version">Version %s</string>
+    <string name="about_version_nightly">Nightly Build</string>
+    <string name="about_version_beta">Beta Preview</string>
+    <string name="about_version_stable">Stable Release</string>
+    <string name="about_build_history">Build History</string>
+    <string name="about_check_update">Check for Updates</string>
+    <string name="about_check_now">Check for Updates Now</string>
+    <string name="about_get_update">Get Update</string>
+    <string name="about_get_update_with_version">Get Update (%s)</string>
+    <string name="about_check_failed">Check failed: %s</string>
+    <string name="about_license_title">Open Source Licenses</string>
+    <string name="about_license_desc">Acknowledgments for open-source libraries supporting this project</string>
+    <string name="about_legal_title">Legal &amp; Disclaimer</string>
+    <string name="about_legal_desc">View disclaimer and intellectual property terms</string>
+    <string name="about_copyright">© 2025-2026 HOE Team</string>
+    <string name="about_license_notice">Open-sourced under MIT License</string>
+
+    <!-- License Screen -->
+    <string name="license_title">Open Source Licenses</string>
+    <string name="license_subtitle">Acknowledgments for open-source developers</string>
+    <string name="license_back">Back</string>
+
+    <!-- Legal Screen -->
+    <string name="legal_title">Legal &amp; Disclaimer</string>
+    <string name="legal_subtitle">Please read the following terms carefully before use</string>
+    <string name="legal_back">Back</string>
+    <string name="legal_disclaimer_title">Disclaimer</string>
+    <string name="legal_disclaimer_body">OpenDroidChat is a graphical LLM API chat client. It does not provide, generate, or create any content. All content displayed or output through this application is generated entirely by third-party API services that you connect to, and is unrelated to the developers of this application.</string>
+    <string name="legal_disclaimer_agree">Users should fully understand and agree to the following terms:</string>
+    <string name="legal_disclaimer_clause1">1. This application serves solely as a graphical interface tool for API calls and does not participate in the generation, modification, review, or distribution of any content.</string>
+    <string name="legal_disclaimer_clause2">2. The user assumes full responsibility for the accuracy, legality, compliance, and any consequences of content generated by third-party API services.</string>
+    <string name="legal_disclaimer_clause3">3. The developers shall not be liable for any direct or indirect damages arising from the use of this application, including but not limited to data loss, business interruption, reputation damage, or other economic losses.</string>
+    <string name="legal_disclaimer_clause4">4. Users must ensure their usage complies with applicable laws and the terms and policies of third-party API providers.</string>
+    <string name="legal_disclaimer_clause5">5. The developers reserve the right to modify this disclaimer at any time. Modified terms take effect immediately upon publication. Users are advised to review this page periodically.</string>
+    <string name="legal_disclaimer_full">%1$s\n\n%2$s\n\n%3$s\n\n%4$s\n\n%5$s</string>
+
+    <string name="legal_ip_title">Intellectual Property</string>
+    <string name="legal_ip_body">The source code of this application is open-sourced under the MIT License. You are free to use, modify, and distribute it in compliance with the license terms.\n\nThird-party open-source libraries used by this application are governed by their respective licenses. See the \"Open Source Licenses\" page for details.\n\nThe name, logo, and related visual elements of this application are the intellectual property of HOE Team and may not be used for commercial purposes without permission.</string>
+
+    <!-- Version Update Card -->
+    <string name="version_card_in_use">In Use</string>
+    <string name="version_card_syncing">Syncing…</string>
+    <string name="version_card_get_latest">Get Latest</string>
+    <string name="version_card_new_version_found">New version found: %s</string>
+    <string name="version_card_network_error">Network Error</string>
+    <string name="version_card_up_to_date">Up to Date</string>
+    <string name="version_card_recheck">Re-check</string>
+    <string name="version_card_get_now">Get Now</string>
+
+    <!-- Message Bubble -->
+    <string name="message_thinking_in_progress">Thinking…</string>
+    <string name="message_thinking_complete">Thinking complete</string>
+    <string name="message_copied_to_clipboard">Copied to clipboard</string>
+
+    <!-- Loading Indicator -->
+    <string name="loading_waiting_for_response">Waiting for LLM API response…</string>
+
+    <!-- Model List Item -->
+    <string name="model_list_switch_first">Please switch to another instance first before deleting</string>
+
+    <!-- Library Card -->
+    <string name="library_card_view_license">View License</string>
+
+    <!-- Update Dialog -->
+    <string name="update_dialog_title">New Version Available</string>
+    <string name="update_dialog_new_version">New version: %s</string>
+    <string name="update_dialog_download_question">Would you like to download the update?</string>
+    <string name="update_dialog_download">Download Update</string>
+    <string name="update_dialog_cancel">Cancel</string>
+
+    <!-- Provider Names -->
+    <string name="provider_openai">OpenAI / Azure OpenAI</string>
+    <string name="provider_gemini">Google Gemini API</string>
+    <string name="provider_deepseek">DeepSeek</string>
+    <string name="provider_dashscope">Alibaba Dashscope</string>
+    <string name="provider_claude">Claude</string>
+    <string name="provider_custom">Custom API</string>
+
+    <!-- Error Messages -->
+    <string name="error_config_required">Please configure a valid LLM API instance first!</string>
+    <string name="error_api_url_or_key">API URL or API Key cannot be empty.</string>
+    <string name="error_api_response">LLM API response error: %s</string>
+    <string name="error_api_call_failed">API call failed: %s</string>
+    <string name="error_no_response">Failed to get LLM API response.</string>
+    <string name="error_no_gemini_response">Failed to get Gemini API response.</string>
+    <string name="error_no_claude_response">Failed to get Claude API response.</string>
+    <string name="error_unknown">Unknown error</string>
+</resources>

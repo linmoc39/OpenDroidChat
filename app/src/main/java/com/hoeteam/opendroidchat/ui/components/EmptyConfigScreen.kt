@@ -22,9 +22,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hoeteam.opendroidchat.R
 
 @Composable
 fun EmptyConfigScreen(onNavigateToModelSettings: () -> Unit) {
@@ -50,7 +52,7 @@ fun EmptyConfigScreen(onNavigateToModelSettings: () -> Unit) {
     ) {
         // M3E 风格：更具表现力的标题文字
         Text(
-            text = "欢迎使用\nOpenDroidChat",
+            text = stringResource(R.string.chat_empty_config_title),
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.ExtraBold,
             color = MaterialTheme.colorScheme.primary
@@ -59,7 +61,7 @@ fun EmptyConfigScreen(onNavigateToModelSettings: () -> Unit) {
         Spacer(Modifier.height(8.dp))
         
         Text(
-            text = "您尚未配置任何 LLM 模型",
+            text = stringResource(R.string.chat_empty_config_desc),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -82,7 +84,7 @@ fun EmptyConfigScreen(onNavigateToModelSettings: () -> Unit) {
             )
         ) {
             Text(
-                text = "立即添加模型",
+                text = stringResource(R.string.chat_empty_config_button),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 1.sp

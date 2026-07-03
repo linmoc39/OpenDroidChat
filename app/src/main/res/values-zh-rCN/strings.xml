@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">OpenDroidChat</string>
+
+    <!-- 导航栏 -->
+    <string name="nav_chat">聊天</string>
+    <string name="nav_models">模型</string>
+    <string name="nav_settings">设置</string>
+
+    <!-- 聊天界面 -->
+    <string name="chat_input_placeholder">输入消息…</string>
+    <string name="chat_add_file">添加文件</string>
+    <string name="chat_send">发送</string>
+    <string name="chat_remove_file">移除文件</string>
+    <string name="chat_scroll_to_bottom">到底部</string>
+    <string name="chat_file_read_error">无法读取该文件或文件类型不支持</string>
+    <string name="chat_retry">重试</string>
+    <string name="chat_empty_config_title">尚未配置模型</string>
+    <string name="chat_empty_config_desc">请先添加一个 LLM API 实例以开始聊天</string>
+    <string name="chat_empty_config_button">前往模型管理</string>
+
+    <!-- 模型设置界面 -->
+    <string name="model_settings_title">模型实例管理</string>
+    <string name="model_settings_add">添加新实例</string>
+    <string name="model_settings_empty">您还没有配置任何模型。\n点击右下角的 \'+\' 按钮开始添加。</string>
+
+    <!-- 模型编辑界面 -->
+    <string name="model_edit_title_add">添加新模型</string>
+    <string name="model_edit_title_edit">配置实例</string>
+    <string name="model_edit_save_add">保存并启用</string>
+    <string name="model_edit_save_edit">保存修改</string>
+    <string name="model_edit_back">返回</string>
+
+    <string name="model_edit_section_basic">基本信息</string>
+    <string name="model_edit_display_name">显示名称</string>
+    <string name="model_edit_display_name_hint">例如：Qwen-Max-专业版</string>
+    <string name="model_edit_provider">接口提供商</string>
+
+    <string name="model_edit_section_api">API 配置</string>
+    <string name="model_edit_model_id">模型标识 (Model ID)</string>
+    <string name="model_edit_model_id_hint">例如：gpt-4o</string>
+    <string name="model_edit_api_key">API 密钥 (API Key)</string>
+    <string name="model_edit_custom_url">接口地址 (Base URL)</string>
+    <string name="model_edit_custom_url_hint">https://api.example.com/v1</string>
+
+    <string name="model_edit_section_advanced">进阶偏好</string>
+    <string name="model_edit_system_prompt">系统提示词 (System Prompt)</string>
+    <string name="model_edit_system_prompt_hint">定义 AI 的身份和行为…</string>
+    <string name="model_edit_streaming">流式传输 (Streaming)</string>
+    <string name="model_edit_streaming_desc">开启后可实时查看打字机效果</string>
+
+    <string name="model_edit_thinking">启用思考 (Thinking)</string>
+    <string name="model_edit_thinking_deepseek">DeepSeek V4 深度思考</string>
+    <string name="model_edit_thinking_claude">Claude 扩展思考（自适应/预算模式）</string>
+    <string name="model_edit_thinking_gemini">Gemini 深度思考</string>
+    <string name="model_edit_thinking_openai">OpenAI o-series / GPT-5 推理</string>
+    <string name="model_edit_thinking_effort">思考深度 (Reasoning Effort)</string>
+
+    <string name="model_edit_effort_low">低 (Low)</string>
+    <string name="model_edit_effort_medium">中 (Medium)</string>
+    <string name="model_edit_effort_high">高 (High)</string>
+    <string name="model_edit_effort_max">最大 (Max)</string>
+    <string name="model_edit_effort_xhigh">极高 (X-High)</string>
+
+    <!-- 设置界面 -->
+    <string name="settings_title">应用设置</string>
+    <string name="settings_warning_nightly">技术预览版本 (Nightly)，极不稳定，可能导致数据丢失或发生意料之外的崩溃。</string>
+    <string name="settings_warning_beta">发布前测试版本 (Beta)，不稳定，可能导致数据丢失。</string>
+
+    <string name="settings_section_general">通用设置</string>
+    <string name="settings_dark_mode">深色模式</string>
+    <string name="settings_dark_mode_desc">切换应用视觉主题</string>
+    <string name="settings_section_language">语言</string>
+    <string name="settings_app_language">程序语言 (Language)</string>
+    <string name="settings_language_follow_system">跟随系统</string>
+    <string name="settings_language_zh_cn">中文（简体）</string>
+    <string name="settings_language_zh_tw">中文（繁體）</string>
+    <string name="settings_language_en">English (US)</string>
+
+    <string name="settings_section_update">更新</string>
+    <string name="settings_auto_update">自动检查更新</string>
+    <string name="settings_auto_update_desc">启动时自动检查新版本并提醒</string>
+
+    <string name="settings_section_about">支持与关于</string>
+    <string name="settings_about_app">关于 OpenDroidChat</string>
+    <string name="settings_about_app_desc">版本信息、开源许可与项目详情</string>
+
+    <!-- 关于界面 -->
+    <string name="about_title">关于程序</string>
+    <string name="about_back">返回</string>
+    <string name="about_app_name">OpenDroidChat</string>
+    <string name="about_app_desc">极致纯净的 LLM API 聊天客户端。采用 Material 3 Expressive 设计规范，为您提供兼具生产力与视觉愉悦的交互体验。</string>
+    <string name="about_version">版本 %s</string>
+    <string name="about_version_nightly">Nightly Build</string>
+    <string name="about_version_beta">Beta Preview</string>
+    <string name="about_version_stable">Stable Release</string>
+    <string name="about_build_history">构建历史</string>
+    <string name="about_check_update">检查更新</string>
+    <string name="about_check_now">立即检查新版本</string>
+    <string name="about_get_update">获取更新</string>
+    <string name="about_get_update_with_version">获取更新 (%s)</string>
+    <string name="about_check_failed">检查失败: %s</string>
+    <string name="about_license_title">开放源代码许可</string>
+    <string name="about_license_desc">感谢为本项目提供支持的开源库</string>
+    <string name="about_legal_title">法律声明与免责条款</string>
+    <string name="about_legal_desc">查看免责声明及知识产权相关条款</string>
+    <string name="about_copyright">© 2025-2026 HOE Team</string>
+    <string name="about_license_notice">Open-sourced under MIT License</string>
+
+    <!-- 开源许可界面 -->
+    <string name="license_title">开放源代码许可</string>
+    <string name="license_subtitle">感谢为开源社区做出贡献的开发者</string>
+    <string name="license_back">返回</string>
+
+    <!-- 法律声明界面 -->
+    <string name="legal_title">法律声明与免责条款</string>
+    <string name="legal_subtitle">使用前请仔细阅读以下条款</string>
+    <string name="legal_back">返回</string>
+    <string name="legal_disclaimer_title">免责声明</string>
+    <string name="legal_disclaimer_body">本程序（OpenDroidChat）是一款图形化的大型语言模型（LLM）API 聊天客户端，其本身不提供、不生成、不创造任何内容。所有通过本程序展示或输出的内容，均完全由用户所对接的第三方 API 服务生成，与本程序开发者无关。</string>
+    <string name="legal_disclaimer_agree">使用者应充分了解并同意以下条款：</string>
+    <string name="legal_disclaimer_clause1">1. 本程序仅作为 API 调用的图形界面工具，不参与任何内容的生成、修改、审核或分发过程。</string>
+    <string name="legal_disclaimer_clause2">2. 由第三方 API 服务生成的任何内容，其准确性、合法性、合规性及可能引发的任何后果，均由使用者自行承担全部责任。</string>
+    <string name="legal_disclaimer_clause3">3. 本程序开发者不对因使用本程序而产生的任何直接或间接损失承担责任，包括但不限于数据丢失、业务中断、名誉损害或其他经济损失。</string>
+    <string name="legal_disclaimer_clause4">4. 使用者应确保其使用行为符合所在地法律法规及第三方 API 服务提供商的条款与政策。</string>
+    <string name="legal_disclaimer_clause5">5. 本程序开发者保留随时修改本免责声明的权利，修改后的条款一经发布即生效。建议使用者定期查阅本页面。</string>
+    <string name="legal_disclaimer_full">%1$s\n\n%2$s\n\n%3$s\n\n%4$s\n\n%5$s</string>
+
+    <string name="legal_ip_title">知识产权声明</string>
+    <string name="legal_ip_body">本程序的源代码基于 MIT 许可证开源发布，您可以在遵守该许可证条款的前提下自由使用、修改和分发本程序。\n\n本程序所使用的第三方开源库均遵循其各自的许可证条款，具体信息请参阅「开放源代码许可」页面。\n\n本程序的名称、标识及相关视觉元素的知识产权归 HOE Team 所有，未经许可不得用于任何商业用途。</string>
+
+    <!-- 版本更新卡片 -->
+    <string name="version_card_in_use">正在使用</string>
+    <string name="version_card_syncing">同步中…</string>
+    <string name="version_card_get_latest">获取最新动态</string>
+    <string name="version_card_new_version_found">发现新版本: %s</string>
+    <string name="version_card_network_error">网络连接异常</string>
+    <string name="version_card_up_to_date">已是最新版本</string>
+    <string name="version_card_recheck">重新检查</string>
+    <string name="version_card_get_now">立即获取</string>
+
+    <!-- 消息气泡 -->
+    <string name="message_thinking_in_progress">思考中…</string>
+    <string name="message_thinking_complete">思考结束</string>
+    <string name="message_copied_to_clipboard">已复制到剪贴板</string>
+
+    <!-- 加载指示器 -->
+    <string name="loading_waiting_for_response">正在等待 LLM API 响应…</string>
+
+    <!-- 模型列表项 -->
+    <string name="model_list_switch_first">请先切换到其他实例再删除</string>
+
+    <!-- 开源库卡片 -->
+    <string name="library_card_view_license">查看许可证</string>
+
+    <!-- 更新对话框 -->
+    <string name="update_dialog_title">发现新版本</string>
+    <string name="update_dialog_new_version">新版本: %s</string>
+    <string name="update_dialog_download_question">是否下载更新？</string>
+    <string name="update_dialog_download">下载新版本</string>
+    <string name="update_dialog_cancel">取消</string>
+
+    <!-- 提供商名称 -->
+    <string name="provider_openai">OpenAI / Azure OpenAI</string>
+    <string name="provider_gemini">Google Gemini API</string>
+    <string name="provider_deepseek">DeepSeek</string>
+    <string name="provider_dashscope">阿里云百炼(Dashscope)</string>
+    <string name="provider_claude">Claude</string>
+    <string name="provider_custom">自定义 API</string>
+
+    <!-- 错误信息 -->
+    <string name="error_config_required">请先配置有效的 LLM API 实例！</string>
+    <string name="error_api_url_or_key">API URL 或 API Key 不能为空。</string>
+    <string name="error_api_response">LLM API 响应出错: %s</string>
+    <string name="error_api_call_failed">API 调用失败：%s</string>
+    <string name="error_no_response">未能获取到 LLM API 响应。</string>
+    <string name="error_no_gemini_response">未能获取到 Gemini API 响应。</string>
+    <string name="error_no_claude_response">未能获取到 Claude API 响应。</string>
+    <string name="error_unknown">未知错误</string>
+</resources>

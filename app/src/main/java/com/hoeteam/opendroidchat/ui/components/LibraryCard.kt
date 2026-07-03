@@ -17,8 +17,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.hoeteam.opendroidchat.R
 import com.hoeteam.opendroidchat.ui.screens.OpenSourceLibrary
 
 @Composable
@@ -107,7 +109,7 @@ fun LibraryCard(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "查看许可证",
+                        text = stringResource(R.string.library_card_view_license),
                         style = MaterialTheme.typography.labelMedium
                     )
                 }

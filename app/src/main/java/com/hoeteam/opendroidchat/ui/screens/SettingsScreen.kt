@@ -29,13 +29,21 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hoeteam.opendroidchat.R
 import com.hoeteam.opendroidchat.data.SettingsRepository
 import com.hoeteam.opendroidchat.data.UpdateManager
 import com.hoeteam.opendroidchat.network.VersionType
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,10 +63,28 @@ fun SettingsScreen(
     // 自动更新检查开关
     val autoUpdateCheck by settingsRepository.autoUpdateCheckFlow.collectAsState(initial = true)
 
+    // 应用语言
+    val appLanguage by settingsRepository.appLanguageFlow.collectAsState(initial = "")
+    var showLanguageDialog by remember { mutableStateOf(false) }
+
+    // 语言选项
+    val languageOptions = listOf(
+        "" to stringResource(R.string.settings_language_follow_system),
+        "zh-CN" to stringResource(R.string.settings_language_zh_cn),
+        "zh-TW" to stringResource(R.string.settings_language_zh_tw),
+        "en" to stringResource(R.string.settings_language_en)
+    )
+
+    // 获取当前语言显示名称
+    val currentLanguageDisplay = remember(appLanguage) {
+        languageOptions.find { it.first == appLanguage }?.second
+            ?: languageOptions[0].second
+    }
+
     fun getWarningText(): String? {
         return when (currentVersionType) {
-            VersionType.NIGHTLY -> "技术预览版本 (Nightly)，极不稳定，可能导致数据丢失或发生意料之外的崩溃。"
-            VersionType.BETA -> "发布前测试版本 (Beta)，不稳定，可能导致数据丢失。"
+            VersionType.NIGHTLY -> context.getString(R.string.settings_warning_nightly)
+            VersionType.BETA -> context.getString(R.string.settings_warning_beta)
             VersionType.STABLE -> null
         }
     }
@@ -72,7 +98,7 @@ fun SettingsScreen(
             LargeTopAppBar(
                 title = {
                     Text(
-                        "应用设置",
+                        stringResource(R.string.settings_title),
                         letterSpacing = (-0.2).sp
                     )
                 },
@@ -111,7 +137,7 @@ fun SettingsScreen(
                     ) {
                         Icon(
                             Icons.Filled.Warning,
-                            contentDescription = "警告",
+                            contentDescription = null,
                             tint = MaterialTheme.colorScheme.onErrorContainer,
                             modifier = Modifier.size(24.dp)
                         )
@@ -129,12 +155,12 @@ fun SettingsScreen(
 
             // ===== 通用设置 =====
             SettingsGroup(
-                title = "通用设置",
+                title = stringResource(R.string.settings_section_general),
                 dividerVisible = true
             ) {
                 SettingsListItem(
-                    headline = "深色模式",
-                    subhead = "切换应用视觉主题",
+                    headline = stringResource(R.string.settings_dark_mode),
+                    subhead = stringResource(R.string.settings_dark_mode_desc),
                     icon = Icons.Filled.DarkMode,
                     trailing = {
                         Switch(
@@ -149,14 +175,84 @@ fun SettingsScreen(
                 )
             }
 
-            // ===== 更新设置 =====
+            // ===== 语言设置 =====
             SettingsGroup(
-                title = "更新",
+                title = stringResource(R.string.settings_section_language),
                 dividerVisible = true
             ) {
                 SettingsListItem(
-                    headline = "自动检查更新",
-                    subhead = "启动时自动检查新版本并提醒",
+                    headline = stringResource(R.string.settings_app_language),
+                    subhead = currentLanguageDisplay,
+                    icon = Icons.Filled.Language,
+                    onClick = { showLanguageDialog = true },
+                    trailing = { Icon(Icons.AutoMirrored.Filled.ArrowForward, null, modifier = Modifier.size(20.dp)) }
+                )
+            }
+
+            // 语言选择对话框
+            if (showLanguageDialog) {
+                AlertDialog(
+                    onDismissRequest = { showLanguageDialog = false },
+                    shape = RoundedCornerShape(24.dp),
+                    title = {
+                        Text(
+                            text = stringResource(R.string.settings_app_language),
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                    },
+                    text = {
+                        Column {
+                            languageOptions.forEach { (code, displayName) ->
+                                val onLanguageSelected: () -> Unit = {
+                                    scope.launch {
+                                        settingsRepository.setAppLanguage(code)
+                                        showLanguageDialog = false
+                                        // 立即应用语言设置
+                                        val localeList = when (code) {
+                                            "zh-CN" -> LocaleListCompat.forLanguageTags("zh-CN")
+                                            "zh-TW" -> LocaleListCompat.forLanguageTags("zh-TW")
+                                            "en" -> LocaleListCompat.forLanguageTags("en")
+                                            else -> LocaleListCompat.getEmptyLocaleList()
+                                        }
+                                        AppCompatDelegate.setApplicationLocales(localeList)
+                                    }
+                                }
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable(onClick = onLanguageSelected)
+                                        .padding(vertical = 12.dp, horizontal = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    RadioButton(
+                                        selected = appLanguage == code,
+                                        onClick = onLanguageSelected
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Text(
+                                        text = displayName,
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                }
+                            }
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(onClick = { showLanguageDialog = false }) {
+                            Text(stringResource(R.string.update_dialog_cancel))
+                        }
+                    }
+                )
+            }
+
+            // ===== 更新设置 =====
+            SettingsGroup(
+                title = stringResource(R.string.settings_section_update),
+                dividerVisible = true
+            ) {
+                SettingsListItem(
+                    headline = stringResource(R.string.settings_auto_update),
+                    subhead = stringResource(R.string.settings_auto_update_desc),
                     icon = Icons.Default.Info,
                     trailing = {
                         Switch(
@@ -177,12 +273,12 @@ fun SettingsScreen(
 
             // ===== 支持与关于 =====
             SettingsGroup(
-                title = "支持与关于",
+                title = stringResource(R.string.settings_section_about),
                 dividerVisible = false
             ) {
                 SettingsListItem(
-                    headline = "关于 OpenDroidChat",
-                    subhead = "版本信息、开源许可与项目详情",
+                    headline = stringResource(R.string.settings_about_app),
+                    subhead = stringResource(R.string.settings_about_app_desc),
                     icon = Icons.Filled.Info,
                     onClick = onNavigateToAbout,
                     trailing = { Icon(Icons.AutoMirrored.Filled.ArrowForward, null, modifier = Modifier.size(20.dp)) }

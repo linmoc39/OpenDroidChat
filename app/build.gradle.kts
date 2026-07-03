@@ -16,8 +16,8 @@ android {
         applicationId = "com.hoeteam.opendroidchat"
         minSdk = 23
         targetSdk = 36
-        versionCode = 23
-        versionName = "Stable-1.11-SmarterUpdate"
+        versionCode = 24
+        versionName = "Beta-1.12-HelloWorld"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -133,4 +133,7 @@ dependencies {
 
     implementation("androidx.compose.material:material-icons-core:1.7.8")
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
+
+    // AppCompat (用于 AppCompatDelegate.setApplicationLocales 多语言支持)
+    implementation("androidx.appcompat:appcompat:1.7.0")
 }

@@ -29,8 +29,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -50,13 +52,13 @@ private fun copyToClipboard(context: Context, text: String) {
     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
     val clip = ClipData.newPlainText("聊天内容", text)
     clipboard.setPrimaryClip(clip)
-    Toast.makeText(context, "已复制到剪贴板", Toast.LENGTH_SHORT).show()
+    Toast.makeText(context, context.getString(com.hoeteam.opendroidchat.R.string.message_copied_to_clipboard), Toast.LENGTH_SHORT).show()
 }
 
 @Composable
 fun MessageBubble(
     message: Message,
-    hybridMarkdown: @Composable (String, Modifier, androidx.compose.ui.graphics.Color) -> Unit
+    hybridMarkdown: @Composable (String, Modifier, Color) -> Unit
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -177,7 +179,7 @@ fun MessageBubble(
                         CopyState.Idle -> Icons.Default.ContentCopy
                         CopyState.Copied -> Icons.Default.DoneAll
                     },
-                    contentDescription = if (copyState == CopyState.Idle) "复制内容" else "已复制",
+                    contentDescription = null,
                     tint = if (copyState == CopyState.Copied) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                     modifier = Modifier.size(16.dp)
                 )
@@ -206,7 +208,7 @@ private fun ThinkingBlock(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = if (isStreaming) "思考中..." else "思考结束",
+                text = if (isStreaming) stringResource(com.hoeteam.opendroidchat.R.string.message_thinking_in_progress) else stringResource(com.hoeteam.opendroidchat.R.string.message_thinking_complete),
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.tertiary
@@ -216,7 +218,7 @@ private fun ThinkingBlock(
 
             Icon(
                 imageVector = if (expanded) Icons.Default.KeyboardArrowDown else Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = if (expanded) "收起" else "展开",
+                contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                 modifier = Modifier.size(18.dp)
             )

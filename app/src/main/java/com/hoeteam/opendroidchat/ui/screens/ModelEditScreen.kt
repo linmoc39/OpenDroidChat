@@ -26,12 +26,14 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.hoeteam.opendroidchat.R
 import com.hoeteam.opendroidchat.data.LlmModel
 import com.hoeteam.opendroidchat.data.LlmProvider
 import com.hoeteam.opendroidchat.viewmodel.ChatViewModel
@@ -65,17 +67,14 @@ fun ModelEditScreen(
     var expanded by remember { mutableStateOf(false) }
     var effortExpanded by remember { mutableStateOf(false) }
 
-    // 改用标准的 TopAppBar 滚动行为，或者固定不滚动
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val isSaveEnabled = name.isNotBlank() && apiKey.isNotBlank() && modelName.isNotBlank()
 
-    // 判断当前提供商是否支持思考模式
     val supportsThinking = provider == LlmProvider.DeepSeek ||
             provider == LlmProvider.Claude ||
             provider == LlmProvider.Gemini ||
             provider == LlmProvider.OpenAI
 
-    // 判断当前提供商是否支持 reasoning effort
     val supportsReasoningEffort = enableThinking && (
             provider == LlmProvider.DeepSeek ||
             provider == LlmProvider.OpenAI ||
@@ -88,7 +87,7 @@ fun ModelEditScreen(
             TopAppBar(
                 title = {
                     Text(
-                        if (isNewModel) "添加新模型" else "配置实例",
+                        if (isNewModel) stringResource(R.string.model_edit_title_add) else stringResource(R.string.model_edit_title_edit),
                         style = MaterialTheme.typography.titleLarge.copy(
                             letterSpacing = (-0.2).sp
                         )
@@ -96,7 +95,7 @@ fun ModelEditScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onSave) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.model_edit_back))
                     }
                 },
                 windowInsets = WindowInsets(0, 0, 0, 0),
@@ -149,7 +148,7 @@ fun ModelEditScreen(
                     contentPadding = PaddingValues(16.dp)
                 ) {
                     Text(
-                        if (isNewModel) "保存并启用" else "保存修改",
+                        if (isNewModel) stringResource(R.string.model_edit_save_add) else stringResource(R.string.model_edit_save_edit),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.ExtraBold
                     )
@@ -165,12 +164,12 @@ fun ModelEditScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            M3EInputSection(title = "基本信息") {
+            M3EInputSection(title = stringResource(R.string.model_edit_section_basic)) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("显示名称", fontWeight = FontWeight.Bold) },
-                    placeholder = { Text("例如：Qwen-Max-专业版") },
+                    label = { Text(stringResource(R.string.model_edit_display_name), fontWeight = FontWeight.Bold) },
+                    placeholder = { Text(stringResource(R.string.model_edit_display_name_hint)) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp)
                 )
@@ -185,7 +184,7 @@ fun ModelEditScreen(
                         value = provider.displayName,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("接口提供商", fontWeight = FontWeight.Bold) },
+                        label = { Text(stringResource(R.string.model_edit_provider), fontWeight = FontWeight.Bold) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                         modifier = Modifier.menuAnchor().fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
@@ -220,12 +219,12 @@ fun ModelEditScreen(
                 }
             }
 
-            M3EInputSection(title = "API 配置") {
+            M3EInputSection(title = stringResource(R.string.model_edit_section_api)) {
                 OutlinedTextField(
                     value = modelName,
                     onValueChange = { modelName = it },
-                    label = { Text("模型标识 (Model ID)", fontWeight = FontWeight.Bold) },
-                    placeholder = { Text("例如：gpt-4o") },
+                    label = { Text(stringResource(R.string.model_edit_model_id), fontWeight = FontWeight.Bold) },
+                    placeholder = { Text(stringResource(R.string.model_edit_model_id_hint)) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp)
                 )
@@ -235,7 +234,7 @@ fun ModelEditScreen(
                 OutlinedTextField(
                     value = apiKey,
                     onValueChange = { apiKey = it },
-                    label = { Text("API 密钥 (API Key)", fontWeight = FontWeight.Bold) },
+                    label = { Text(stringResource(R.string.model_edit_api_key), fontWeight = FontWeight.Bold) },
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     modifier = Modifier.fillMaxWidth(),
@@ -247,20 +246,20 @@ fun ModelEditScreen(
                     OutlinedTextField(
                         value = customApiUrl,
                         onValueChange = { customApiUrl = it },
-                        label = { Text("接口地址 (Base URL)", fontWeight = FontWeight.Bold) },
-                        placeholder = { Text("https://api.example.com/v1") },
+                        label = { Text(stringResource(R.string.model_edit_custom_url), fontWeight = FontWeight.Bold) },
+                        placeholder = { Text(stringResource(R.string.model_edit_custom_url_hint)) },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp)
                     )
                 }
             }
 
-            M3EInputSection(title = "进阶偏好") {
+            M3EInputSection(title = stringResource(R.string.model_edit_section_advanced)) {
                 OutlinedTextField(
                     value = systemPrompt,
                     onValueChange = { systemPrompt = it },
-                    label = { Text("系统提示词 (System Prompt)", fontWeight = FontWeight.Bold) },
-                    placeholder = { Text("定义 AI 的身份和行为...") },
+                    label = { Text(stringResource(R.string.model_edit_system_prompt), fontWeight = FontWeight.Bold) },
+                    placeholder = { Text(stringResource(R.string.model_edit_system_prompt_hint)) },
                     maxLines = 5,
                     minLines = 3,
                     modifier = Modifier.fillMaxWidth(),
@@ -276,8 +275,8 @@ fun ModelEditScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("流式传输 (Streaming)", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
-                            Text("开启后可实时查看打字机效果", style = MaterialTheme.typography.bodySmall)
+                            Text(stringResource(R.string.model_edit_streaming), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.model_edit_streaming_desc), style = MaterialTheme.typography.bodySmall)
                         }
                         Switch(checked = useStream, onCheckedChange = { useStream = it })
                     }
@@ -297,14 +296,14 @@ fun ModelEditScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("启用思考 (Thinking)", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.model_edit_thinking), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
                     Text(
                                 when (provider) {
-                                    LlmProvider.DeepSeek -> "DeepSeek V4 深度思考"
-                                    LlmProvider.Claude -> "Claude 扩展思考（自适应/预算模式）"
-                                    LlmProvider.Gemini -> "Gemini 深度思考"
-                                    LlmProvider.OpenAI -> "OpenAI o-series / GPT-5 推理"
-                                    else -> "启用 AI 思考能力"
+                                    LlmProvider.DeepSeek -> stringResource(R.string.model_edit_thinking_deepseek)
+                                    LlmProvider.Claude -> stringResource(R.string.model_edit_thinking_claude)
+                                    LlmProvider.Gemini -> stringResource(R.string.model_edit_thinking_gemini)
+                                    LlmProvider.OpenAI -> stringResource(R.string.model_edit_thinking_openai)
+                                    else -> ""
                                 },
                                 style = MaterialTheme.typography.bodySmall
                             )
@@ -317,23 +316,18 @@ fun ModelEditScreen(
                         Spacer(modifier = Modifier.height(12.dp))
 
                         val effortOptions = when (provider) {
-                            // DeepSeek 文档：思考强度支持 "high" 和 "max"
                             LlmProvider.DeepSeek -> listOf("high", "max")
-                            // Claude 4.6+ 自适应模式支持 low/medium/high/xhigh
                             LlmProvider.Claude -> listOf("low", "medium", "high", "xhigh")
-                            // OpenAI o-series / GPT-5 支持 low/medium/high
                             LlmProvider.OpenAI -> listOf("low", "medium", "high")
-                            // 自定义 API 不支持思考模式
                             else -> emptyList()
                         }
 
-
                         val effortLabels = mapOf(
-                            "low" to "低 (Low)",
-                            "medium" to "中 (Medium)",
-                            "high" to "高 (High)",
-                            "max" to "最大 (Max)",
-                            "xhigh" to "极高 (X-High)"
+                            "low" to stringResource(R.string.model_edit_effort_low),
+                            "medium" to stringResource(R.string.model_edit_effort_medium),
+                            "high" to stringResource(R.string.model_edit_effort_high),
+                            "max" to stringResource(R.string.model_edit_effort_max),
+                            "xhigh" to stringResource(R.string.model_edit_effort_xhigh)
                         )
 
                         ExposedDropdownMenuBox(
@@ -344,7 +338,7 @@ fun ModelEditScreen(
                                 value = effortLabels[reasoningEffort] ?: reasoningEffort,
                                 onValueChange = {},
                                 readOnly = true,
-                                label = { Text("思考深度 (Reasoning Effort)", fontWeight = FontWeight.Bold) },
+                                label = { Text(stringResource(R.string.model_edit_thinking_effort), fontWeight = FontWeight.Bold) },
                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = effortExpanded) },
                                 modifier = Modifier.menuAnchor().fillMaxWidth(),
                                 shape = RoundedCornerShape(16.dp),

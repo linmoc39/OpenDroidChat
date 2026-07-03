@@ -8,6 +8,7 @@ package com.hoeteam.opendroidchat.ui.screens
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -28,9 +29,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hoeteam.opendroidchat.R
 import com.hoeteam.opendroidchat.data.UpdateManager
 import com.hoeteam.opendroidchat.network.UpdateCheckResult
 import com.hoeteam.opendroidchat.network.VersionType
@@ -75,7 +78,7 @@ fun AboutScreen(
                     currentVersion = currentVersion,
                     latestVersion = null,
                     versionType = currentVersionType,
-                    error = "检查失败: ${e.message}"
+                    error = context.getString(R.string.about_check_failed, e.message ?: "")
                 )
             } finally {
                 if (isActive) isChecking = false
@@ -98,13 +101,13 @@ fun AboutScreen(
             LargeTopAppBar(
                 title = {
                     Text(
-                        "关于程序",
+                        stringResource(R.string.about_title),
                         letterSpacing = (-0.2).sp
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.about_back))
                     }
                 },
                 windowInsets = WindowInsets(0, 0, 0, 0),
@@ -134,14 +137,14 @@ fun AboutScreen(
             ) {
                 Column(modifier = Modifier.padding(24.dp)) {
                     Text(
-                        text = "OpenDroidChat",
+                        text = stringResource(R.string.about_app_name),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.ExtraBold,
                         color = MaterialTheme.colorScheme.primary
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "极致纯净的 LLM API 聊天客户端。采用 Material 3 Expressive 设计规范，为您提供兼具生产力与视觉愉悦的交互体验。",
+                        text = stringResource(R.string.about_app_desc),
                         style = MaterialTheme.typography.bodyLarge,
                         lineHeight = 24.sp
                     )
@@ -158,7 +161,7 @@ fun AboutScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "版本 $currentVersion",
+                                text = stringResource(R.string.about_version, currentVersion),
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold
                             )
@@ -169,9 +172,9 @@ fun AboutScreen(
                             ) {
                                 Text(
                                     text = when (currentVersionType) {
-                                        VersionType.NIGHTLY -> "Nightly Build"
-                                        VersionType.BETA -> "Beta Preview"
-                                        VersionType.STABLE -> "Stable Release"
+                                        VersionType.NIGHTLY -> stringResource(R.string.about_version_nightly)
+                                        VersionType.BETA -> stringResource(R.string.about_version_beta)
+                                        VersionType.STABLE -> stringResource(R.string.about_version_stable)
                                     },
                                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                                     style = MaterialTheme.typography.labelMedium,
@@ -196,7 +199,7 @@ fun AboutScreen(
                                 ) {
                                     Icon(Icons.Default.Build, null, modifier = Modifier.size(18.dp))
                                     Spacer(modifier = Modifier.width(8.dp))
-                                    Text("构建历史")
+                                    Text(stringResource(R.string.about_build_history))
                                 }
                                 OutlinedButton(
                                     onClick = { checkForUpdates() },
@@ -206,7 +209,7 @@ fun AboutScreen(
                                 ) {
                                     Icon(Icons.Default.Refresh, null, modifier = Modifier.size(18.dp))
                                     Spacer(modifier = Modifier.width(8.dp))
-                                    Text("检查更新")
+                                    Text(stringResource(R.string.about_check_update))
                                 }
                             }
                         } else {
@@ -228,7 +231,7 @@ fun AboutScreen(
                                     ) {
                                         Icon(Icons.Default.Refresh, null, modifier = Modifier.size(18.dp))
                                         Spacer(modifier = Modifier.width(8.dp))
-                                        Text("立即检查新版本", fontWeight = FontWeight.Bold)
+                                        Text(stringResource(R.string.about_check_now), fontWeight = FontWeight.Bold)
                                     }
 
                                     // 当检查结果有新版本时，显示"获取更新"按钮
@@ -246,7 +249,7 @@ fun AboutScreen(
                                             Icon(Icons.Default.Download, null, modifier = Modifier.size(18.dp))
                                             Spacer(modifier = Modifier.width(8.dp))
                                             Text(
-                                                if (versionTag.isNotEmpty()) "获取更新 ($versionTag)" else "获取更新",
+                                                if (versionTag.isNotEmpty()) stringResource(R.string.about_get_update_with_version, versionTag) else stringResource(R.string.about_get_update),
                                                 fontWeight = FontWeight.Bold
                                             )
                                         }
@@ -291,15 +294,15 @@ fun AboutScreen(
                     ),
                 shape = RoundedCornerShape(24.dp),
                 color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
-                border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
             ) {
                 Row(
                     modifier = Modifier.padding(24.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("开放源代码许可", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        Text("感谢为本项目提供支持的开源库", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.about_license_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.about_license_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     Icon(Icons.AutoMirrored.Filled.ArrowForward, null, tint = MaterialTheme.colorScheme.primary)
                 }
@@ -320,15 +323,15 @@ fun AboutScreen(
                     ),
                 shape = RoundedCornerShape(24.dp),
                 color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
-                border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
             ) {
                 Row(
                     modifier = Modifier.padding(24.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("法律声明与免责条款", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        Text("查看免责声明及知识产权相关条款", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.about_legal_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.about_legal_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     Icon(Icons.AutoMirrored.Filled.ArrowForward, null, tint = MaterialTheme.colorScheme.primary)
                 }
@@ -341,12 +344,12 @@ fun AboutScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    "© 2025-2026 HOE Team",
+                    stringResource(R.string.about_copyright),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    "Open-sourced under MIT License\n\n",
+                    stringResource(R.string.about_license_notice),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

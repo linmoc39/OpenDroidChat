@@ -19,10 +19,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.hoeteam.opendroidchat.R
 import com.hoeteam.opendroidchat.ui.components.ModelListItem
 import com.hoeteam.opendroidchat.viewmodel.ChatViewModel
 import com.hoeteam.opendroidchat.viewmodel.ChatViewModelFactory
@@ -44,7 +46,7 @@ fun ModelSettingsScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "模型实例管理",
+                        stringResource(R.string.model_settings_title),
                         style = MaterialTheme.typography.titleLarge.copy(
                             letterSpacing = (-0.2).sp
                         )
@@ -66,7 +68,7 @@ fun ModelSettingsScreen(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation(defaultElevation = 4.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = "添加新实例")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.model_settings_add))
             }
         }
     ) { paddingValues ->
@@ -85,7 +87,7 @@ fun ModelSettingsScreen(
                         color = MaterialTheme.colorScheme.surfaceContainer
                     ) {
                         Text(
-                            "您还没有配置任何模型。\n点击右下角的 '+' 按钮开始添加。",
+                            stringResource(R.string.model_settings_empty),
                             modifier = Modifier.padding(24.dp),
                             style = MaterialTheme.typography.bodyLarge,
                             lineHeight = 24.sp,

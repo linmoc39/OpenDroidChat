@@ -30,9 +30,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.hoeteam.opendroidchat.R
 import com.hoeteam.opendroidchat.data.SelectedFile
 
 @Composable
@@ -70,7 +72,7 @@ fun ChatInput(
         OutlinedTextField(
             value = text,
             onValueChange = onTextChange,
-            placeholder = { Text("输入消息...") },
+            placeholder = { Text(stringResource(R.string.chat_input_placeholder)) },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
             keyboardActions = KeyboardActions(onSend = { if (isFabEnabled) onSend() }),
@@ -94,7 +96,7 @@ fun ChatInput(
                 ) {
                     Icon(
                         Icons.Filled.Add,
-                        contentDescription = "添加文件",
+                        contentDescription = stringResource(R.string.chat_add_file),
                         modifier = Modifier.size(20.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -131,7 +133,7 @@ fun ChatInput(
                     } else {
                         Icon(
                             Icons.AutoMirrored.Filled.Send,
-                            contentDescription = "发送",
+                            contentDescription = stringResource(R.string.chat_send),
                             modifier = Modifier.size(16.dp),
                             tint = if (isFabEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                         )
@@ -178,7 +180,7 @@ private fun FileChip(
             Spacer(Modifier.width(4.dp))
             Icon(
                 Icons.Filled.Close,
-                contentDescription = "移除文件",
+                contentDescription = stringResource(R.string.chat_remove_file),
                 modifier = Modifier
                     .size(18.dp)
                     .clickable(onClick = onRemove),

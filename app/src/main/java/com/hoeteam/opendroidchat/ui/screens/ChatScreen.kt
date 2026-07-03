@@ -26,8 +26,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.hoeteam.opendroidchat.R
 import com.hoeteam.opendroidchat.data.createFilePickerIntent
 import com.hoeteam.opendroidchat.data.selectFileFromUri
 import com.hoeteam.opendroidchat.ui.components.*
@@ -60,7 +62,7 @@ fun ChatScreen(
         viewModel.errorState.collect { error ->
             val result = snackbarHostState.showSnackbar(
                 message = error.message,
-                actionLabel = "重试",
+                actionLabel = context.getString(R.string.chat_retry),
                 duration = SnackbarDuration.Indefinite
             )
             if (result == SnackbarResult.ActionPerformed) {
@@ -82,7 +84,7 @@ fun ChatScreen(
                     viewModel.setSelectedFile(file)
                 } else {
                     scope.launch {
-                        snackbarHostState.showSnackbar("无法读取该文件或文件类型不支持")
+                        snackbarHostState.showSnackbar(context.getString(R.string.chat_file_read_error))
                     }
                 }
             }
@@ -218,7 +220,7 @@ fun ChatScreen(
                     shape = RoundedCornerShape(20.dp), // M3E 大圆角 FAB
                     modifier = Modifier.padding(bottom = 16.dp)
                 ) {
-                    Icon(Icons.Default.ArrowDownward, contentDescription = "到底部")
+                    Icon(Icons.Default.ArrowDownward, contentDescription = stringResource(R.string.chat_scroll_to_bottom))
                 }
             }
         }

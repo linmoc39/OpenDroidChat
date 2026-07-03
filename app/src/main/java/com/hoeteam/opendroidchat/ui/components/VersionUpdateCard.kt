@@ -6,6 +6,7 @@ The source code is open-sourced under the MIT License.
 package com.hoeteam.opendroidchat.ui.components
 
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -23,8 +24,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.hoeteam.opendroidchat.R
+import com.hoeteam.opendroidchat.data.UpdateManager
 import com.hoeteam.opendroidchat.network.UpdateCheckResult
 import com.hoeteam.opendroidchat.network.VersionType
 
@@ -36,7 +40,7 @@ fun VersionUpdateCard(
     targetType: VersionType,
     result: UpdateCheckResult?,
     isChecking: Boolean,
-    updateManager: com.hoeteam.opendroidchat.data.UpdateManager,
+    updateManager: UpdateManager,
     onCheckUpdate: () -> Unit
 ) {
     val isCurrent = currentVersionType == targetType
@@ -64,7 +68,7 @@ fun VersionUpdateCard(
             MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) 
         else 
             MaterialTheme.colorScheme.surfaceContainer,
-        border = if (isCurrent) androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)) else null,
+        border = if (isCurrent) BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)) else null,
         tonalElevation = if (isCurrent) 4.dp else 1.dp
     ) {
         Column(
@@ -84,14 +88,14 @@ fun VersionUpdateCard(
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 if (isCurrent) {
-                    // M3E 药丸形标签，强化“当前使用”
+                    // M3E 药丸形标签，强化"当前使用"
                     Surface(
                         color = MaterialTheme.colorScheme.primary,
                         shape = RoundedCornerShape(100),
                         shadowElevation = 2.dp
                     ) {
                         Text(
-                            text = "正在使用",
+                            text = stringResource(R.string.version_card_in_use),
                             color = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                             style = MaterialTheme.typography.labelMedium,
@@ -119,7 +123,7 @@ fun VersionUpdateCard(
                                 color = if (isCurrent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
                             )
                             Spacer(modifier = Modifier.width(12.dp))
-                            Text("同步中...", style = MaterialTheme.typography.bodyMedium)
+                            Text(stringResource(R.string.version_card_syncing), style = MaterialTheme.typography.bodyMedium)
                         }
                     }
 
@@ -135,7 +139,7 @@ fun VersionUpdateCard(
                         ) {
                             Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("获取最新动态")
+                            Text(stringResource(R.string.version_card_get_latest))
                         }
                     }
 
@@ -156,9 +160,9 @@ fun VersionUpdateCard(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = when {
-                                        result.hasUpdate -> "发现新版本: ${result.latestVersion}"
-                                        result.error != null -> "网络连接异常"
-                                        else -> "已是最新版本"
+                                        result.hasUpdate -> stringResource(R.string.version_card_new_version_found, result.latestVersion ?: "")
+                                        result.error != null -> stringResource(R.string.version_card_network_error)
+                                        else -> stringResource(R.string.version_card_up_to_date)
                                     },
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.SemiBold,
@@ -180,7 +184,7 @@ fun VersionUpdateCard(
                                     shape = RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp, topEnd = 4.dp, bottomEnd = 4.dp),
                                     contentPadding = PaddingValues(vertical = 12.dp)
                                 ) {
-                                    Text("重新检查", fontWeight = FontWeight.Bold)
+                                    Text(stringResource(R.string.version_card_recheck), fontWeight = FontWeight.Bold)
                                 }
 
                                 Button(
@@ -201,7 +205,7 @@ fun VersionUpdateCard(
                                 ) {
                                     Icon(Icons.Default.Download, null, modifier = Modifier.size(18.dp))
                                     Spacer(modifier = Modifier.width(6.dp))
-                                    Text("立即获取", fontWeight = FontWeight.Bold)
+                                    Text(stringResource(R.string.version_card_get_now), fontWeight = FontWeight.Bold)
                                 }
                             }
                         }

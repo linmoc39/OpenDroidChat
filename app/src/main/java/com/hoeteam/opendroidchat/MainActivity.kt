@@ -7,12 +7,19 @@ package com.hoeteam.opendroidchat
 
 import android.content.Context
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.automirrored.filled.*
@@ -23,8 +30,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
@@ -37,20 +48,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.NavType
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.TextButton
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.hoeteam.opendroidchat.data.SettingsRepository
 import com.hoeteam.opendroidchat.data.UpdateManager
 import com.hoeteam.opendroidchat.data.dataStore
@@ -72,10 +70,16 @@ import com.hoeteam.opendroidchat.viewmodel.ThemeViewModelFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // 在 setContent 之前同步应用已保存的语言设置
+        applySavedLanguageSync()
 
         // 预热 DataStore：在 Activity 创建时触发 DataStore 文件加载，
         // 确保第一个 Flow 订阅时数据已在内存中，避免冷启动 IO 延迟
@@ -106,7 +110,7 @@ class MainActivity : ComponentActivity() {
                             shape = RoundedCornerShape(24.dp),
                             title = {
                                 Text(
-                                    text = "发现新版本",
+                                    text = stringResource(R.string.update_dialog_title),
                                     fontWeight = FontWeight.ExtraBold
                                 )
                             },
@@ -114,13 +118,13 @@ class MainActivity : ComponentActivity() {
                                 Column {
                                     if (versionTag.isNotEmpty()) {
                                         Text(
-                                            text = "新版本: $versionTag",
+                                            text = stringResource(R.string.update_dialog_new_version, versionTag),
                                             style = MaterialTheme.typography.bodyMedium
                                         )
                                     }
                                     Spacer(Modifier.height(12.dp))
                                     Text(
-                                        text = "是否下载更新?",
+                                        text = stringResource(R.string.update_dialog_download_question),
                                         style = MaterialTheme.typography.bodyMedium
                                     )
                                 }
@@ -135,7 +139,7 @@ class MainActivity : ComponentActivity() {
                                 ) {
                                     Icon(Icons.Default.Download, null, modifier = Modifier.size(18.dp))
                                     Spacer(Modifier.width(8.dp))
-                                    Text("下载新版本", fontWeight = FontWeight.Bold)
+                                    Text(stringResource(R.string.update_dialog_download), fontWeight = FontWeight.Bold)
                                 }
                             },
                             confirmButton = {
@@ -143,7 +147,7 @@ class MainActivity : ComponentActivity() {
                                     onClick = { showUpdateDialog = false },
                                     shape = RoundedCornerShape(12.dp)
                                 ) {
-                                    Text("取消")
+                                    Text(stringResource(R.string.update_dialog_cancel))
                                 }
                             },
                         )
@@ -176,6 +180,50 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    /**
+     * 在 setContent 之前同步应用已保存的语言设置。
+     * 使用 runBlocking 确保语言在 UI 组合之前生效。
+     */
+    private fun applySavedLanguageSync() {
+        try {
+            val languageCode = runBlocking(Dispatchers.IO) {
+                val settingsRepo = SettingsRepository(this@MainActivity)
+                settingsRepo.appLanguageFlow.first()
+            }
+            applyLanguage(languageCode)
+        } catch (_: Exception) {
+            // 语言应用失败不影响主流程
+        }
+    }
+
+    /**
+     * 从 DataStore 读取已保存的语言设置并应用到 AppCompatDelegate。
+     */
+    private fun applySavedLanguage() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val settingsRepo = SettingsRepository(this@MainActivity)
+                val languageCode = settingsRepo.appLanguageFlow.first()
+                applyLanguage(languageCode)
+            } catch (_: Exception) {
+                // 语言应用失败不影响主流程
+            }
+        }
+    }
+
+    /**
+     * 根据语言代码设置 AppCompatDelegate 的区域设置。
+     */
+    private fun applyLanguage(languageCode: String) {
+        val localeList = when (languageCode) {
+            "zh-CN" -> LocaleListCompat.forLanguageTags("zh-CN")
+            "zh-TW" -> LocaleListCompat.forLanguageTags("zh-TW")
+            "en" -> LocaleListCompat.forLanguageTags("en")
+            else -> LocaleListCompat.getEmptyLocaleList() // 跟随系统
+        }
+        AppCompatDelegate.setApplicationLocales(localeList)
     }
 
     /**
@@ -221,9 +269,9 @@ fun MainNavigation(themeViewModel: ThemeViewModel) {
     val viewModel: ChatViewModel = viewModel(factory = ChatViewModelFactory(context))
 
     val screens = listOf(
-        Destinations.CHAT_SCREEN to "聊天",
-        Destinations.MODEL_SETTINGS to "模型",
-        Destinations.SETTINGS_SCREEN to "设置"
+        Destinations.CHAT_SCREEN to stringResource(R.string.nav_chat),
+        Destinations.MODEL_SETTINGS to stringResource(R.string.nav_models),
+        Destinations.SETTINGS_SCREEN to stringResource(R.string.nav_settings)
     )
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()

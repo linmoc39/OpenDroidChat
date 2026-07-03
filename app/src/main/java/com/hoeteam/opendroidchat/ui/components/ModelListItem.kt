@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.hoeteam.opendroidchat.data.LlmModel
@@ -104,7 +105,7 @@ fun ModelListItem(
                 IconButton(onClick = onEdit) {
                     Icon(
                         Icons.Filled.Edit, 
-                        contentDescription = "编辑实例",
+                        contentDescription = null,
                         tint = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.primary
                     )
                 }
@@ -113,20 +114,20 @@ fun ModelListItem(
                     IconButton(onClick = { onDelete(model) }) {
                         Icon(
                             Icons.Filled.Delete, 
-                            contentDescription = "删除实例", 
+                            contentDescription = null, 
                             tint = MaterialTheme.colorScheme.error
                         )
                     }
                 } else if (isDeletable && isSelected) {
                     TooltipBox(
                         positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
-                        tooltip = { PlainTooltip { Text("请先切换到其他实例再删除") } },
+                        tooltip = { PlainTooltip { Text(stringResource(com.hoeteam.opendroidchat.R.string.model_list_switch_first)) } },
                         state = rememberTooltipState()
                     ) {
                         IconButton(onClick = { /* Do nothing */ }, enabled = false) {
                             Icon(
                                 Icons.Filled.Delete, 
-                                contentDescription = "删除实例", 
+                                contentDescription = null, 
                                 tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
                             )
                         }

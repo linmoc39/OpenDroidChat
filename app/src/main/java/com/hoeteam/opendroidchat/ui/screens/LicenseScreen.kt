@@ -21,9 +21,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hoeteam.opendroidchat.R
 import com.hoeteam.opendroidchat.ui.components.LibraryCard
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -95,11 +97,11 @@ fun LicenseScreen(
                 title = {
                     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         Text(
-                            text = "开放源代码许可",
+                            text = stringResource(R.string.license_title),
                             letterSpacing = (-0.5).sp
                         )
                         Text(
-                            text = "感谢为开源社区做出贡献的开发者",
+                            text = stringResource(R.string.license_subtitle),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -109,7 +111,7 @@ fun LicenseScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "返回",
+                            contentDescription = stringResource(R.string.license_back),
                             modifier = Modifier.size(24.dp)
                         )
                     }

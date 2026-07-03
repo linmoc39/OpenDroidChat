@@ -16,7 +16,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.hoeteam.opendroidchat.R
 
 @Composable
 fun LoadingIndicator() {
@@ -30,6 +32,6 @@ fun LoadingIndicator() {
             color = MaterialTheme.colorScheme.primary
         )
         Spacer(Modifier.width(8.dp))
-        Text("正在等待 LLM API 响应...", style = MaterialTheme.typography.bodySmall)
+        Text(stringResource(R.string.loading_waiting_for_response), style = MaterialTheme.typography.bodySmall)
     }
 }

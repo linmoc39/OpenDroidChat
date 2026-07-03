@@ -35,6 +35,7 @@ class SettingsRepository(private val context: Context) {
         val CURRENT_MODEL_ID = stringPreferencesKey("current_model_id")
         val DARK_THEME_ENABLED = booleanPreferencesKey("dark_theme_enabled")
         val AUTO_UPDATE_CHECK = booleanPreferencesKey("auto_update_check")
+        val APP_LANGUAGE = stringPreferencesKey("app_language")
     }
 
     private val gson = Gson()
@@ -134,6 +135,20 @@ class SettingsRepository(private val context: Context) {
     suspend fun setAutoUpdateCheck(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.AUTO_UPDATE_CHECK] = enabled
+        }
+    }
+
+    // ==================== 应用语言设置 ====================
+
+    // 10. 应用语言 Flow（默认空字符串表示跟随系统）
+    val appLanguageFlow: Flow<String> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.APP_LANGUAGE] ?: ""
+    }
+
+    // 11. 设置应用语言
+    suspend fun setAppLanguage(languageCode: String) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.APP_LANGUAGE] = languageCode
         }
     }
 
