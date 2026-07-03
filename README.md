@@ -14,16 +14,14 @@
 [![LICENSE](https://img.shields.io/github/license/HOE-Team/OpenDroidChat?style=for-the-badge)](https://github.com/HOE-Team/OpenDroidChat/blob/main/LICENSE)
 ![GitHub Release](https://img.shields.io/github/v/release/HOE-Team/OpenDroidChat?label=Release&logo=github&style=for-the-badge)
 
-**简体中文 | [English](docs/README_EN.md)**
+**简体中文 | [English](docs/README_EN.md) | [繁體中文](docs/README_ZHTW.md)**
 </div>
 
 > [!IMPORTANT]
-> OpenDroidChat正处于危机！访问并了解 [KeepAndroidOpen](https://keepandroidopen.org)，反对 Google 强制验证所有 Android 开发者的政策 —— 这破坏了 Android 的开放根基
+> OpenDroidChat正处于危机！访问并了解 [KeepAndroidOpen[↗]](https://keepandroidopen.org)，反对 Google 强制验证所有 Android 开发者的政策 —— 这破坏了 Android 的开放根基
 
 > [!NOTE]
-> 由于HOE Team开发人员错误的Git操作，导致了安全问题的发生，现已重新创建仓库以消除安全问题，对各贡献者及开发者带来的不便还请谅解，HOE Team将在今后的开发中避免此类安全问题的再次发生。  
-> 因为仓库的重新创建，先前的Releases、Star、Commit和Issue记录都已不存在，对各位用户和支持者带来的困扰我们深感歉意。  
-> 注意：本项目已执行密钥轮换，您可能需要卸载后重新安装应用
+> 程序翻译尚不完善，如果您有能力进行 OpenDroidChat 项目的本土化，欢迎向我们发送 [Pull Request](https://github.com/HOE-Team/OpenDroidChat/pulls)。
 
 ## 🔨 技术栈
 
@@ -38,11 +36,12 @@
 ## ✨ 特性
 
 * 支持 Android 6.0(API等级23) 及以上版本
-* 系统原生、美观的 Compose + M3 界面
+* 系统原生、美观的 Material 3 Expressive 界面
 * **支持 Markdown 消息渲染**（代码块、标题、链接等）
-* 轻量级，易于安装和使用
+* 轻量级，易于空间拮据的设备使用
 * 可接入多种 LLM API
 * 使用加密，保护用户LLM API Key
+* 可启用模型思考，增加AI输出内容准确性
 
 > [!NOTE]
 >
@@ -57,7 +56,8 @@
 ## 📥 安装
 
 1. 从 [Releases[↗]](https://github.com/HOE-Team/OpenDroidChat/releases) 下载APK 文件
-2. 使用软件安装器安装
+2. (建议) 校验安装包完整性
+3. 使用软件安装器安装
 
 ## 🛠️ 从源代码构建
 
@@ -122,9 +122,19 @@ project/
 
 ## 💬 群组
 欢迎加入OpenDroidChat Bug反馈/交流群，你可以在这里交流和反馈问题。  
-你可以通过搜索群号（887447099）的方式或者点击[这里](https://qun.qq.com/universal-share/share?ac=1&authKey=DMse5JOJpU4DQbDSXq81177Otr2MtUkJYowAZqhb1AZXkk%2BqV5ZxK7iWaYHbzk3k&busi_data=eyJncm91cENvZGUiOiI4ODc0NDcwOTkiLCJ0b2tlbiI6IjRORVV5VnZpeXRzYjlPOHBBYWViZzJFSkRQeXdLakJFcG9CVU9zbnBYOXJMbGk5RDNHZ3JQbE9iZWU5V1l4MjkiLCJ1aW4iOiI4NTc3MTMxNTAifQ%3D%3D&data=DppwomuajQ62pIIxMwmGWzYlXV0Evn50pE4LwSxUviqpF8mva5LDqOnX3b2WY3Z0cklTpnahpMvCok-VcL6dfA&svctype=4&tempid=h5_group_info)加入群聊。  
+你可以通过搜索群号（887447099）的方式或者点击[这里[↗]](https://qun.qq.com/universal-share/share?ac=1&authKey=DMse5JOJpU4DQbDSXq81177Otr2MtUkJYowAZqhb1AZXkk%2BqV5ZxK7iWaYHbzk3k&busi_data=eyJncm91cENvZGUiOiI4ODc0NDcwOTkiLCJ0b2tlbiI6IjRORVV5VnZpeXRzYjlPOHBBYWViZzJFSkRQeXdLakJFcG9CVU9zbnBYOXJMbGk5RDNHZ3JQbE9iZWU5V1l4MjkiLCJ1aW4iOiI4NTc3MTMxNTAifQ%3D%3D&data=DppwomuajQ62pIIxMwmGWzYlXV0Evn50pE4LwSxUviqpF8mva5LDqOnX3b2WY3Z0cklTpnahpMvCok-VcL6dfA&svctype=4&tempid=h5_group_info)加入群聊。  
 
 如有任何疑问，请发送邮件到 hoe_software_team@outlook.com
+
+## 🔧 开发人员内容
+1. 如要构建 Release APK，请参阅 [Release 版本构建指南 (简体中文)](https://github.com/HOE-Team/OpenDroidChat/blob/main/docs/PERFORM_A_RELEASE_BUILD.md)，如果已经熟悉了 Release 构建流程，可忽略此条提示。
+
+2. OpenDroidChat 使用的 JKS 密钥文件指纹：  
+请通过以下SHA-256指纹验证应用的真实性（您可通过keytool -list -v -keystore或APK分析工具比对）：
+    - **旧证书指纹（已停用）**：
+        06:F6:A5:21:94:DE:BD:85:71:9E:4F:AD:FB:0F:62:44:BA:07:D7:B3:B3:F0:76:16:E3:EA:AC:A4:1F:9F:10:2D
+    - **新证书指纹（当前生效）**：
+        4B:F3:B1:FF:B1:6B:1C:AB:CA:6C:C4:5B:DA:B0:84:4E:48:A9:EA:BC:0A:07:BC:36:CD:71:D0:8E:5A:E7:93:FB
 
 ## 📄 许可证
 
@@ -146,3 +156,7 @@ project/
 > 
 > 旧式应用图标（OpenDroidChat Bugdroid-Say）由[ChatGPT[↗]](https://chatgpt.com)生成，使用CC BY-NC-SA协议开放
 
+> [!NOTE]
+> 由于HOE Team开发人员错误的Git操作，导致了安全问题的发生，现已重新创建仓库以消除安全问题，对各贡献者及开发者带来的不便还请谅解，HOE Team将在今后的开发中避免此类安全问题的再次发生。  
+> 因为仓库的重新创建，先前的Releases、Star、Commit和Issue记录都已不存在，对各位用户和支持者带来的困扰我们深感歉意。  
+> 注意：本项目已执行密钥轮换，您可能需要卸载后重新安装应用
