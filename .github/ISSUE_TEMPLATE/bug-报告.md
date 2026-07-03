@@ -47,6 +47,6 @@ assignees: ''
 *如果有需要补充的上下文，请在此处描述 / Add any other context about the problem here.*
 
 **确认 / Confirmation**  
-[ ] 我确定我的操作无误，是程序本身错误 / I confirm that my operation is correct and this is a program error  
-[ ] 我确定这个问题还未在最新的发布版本被解决 / I confirm that this issue has not been resolved in the latest release version  
-[ ] 我确定此问题不是重复问题 / I confirm that this is not a duplicate issue
+- [ ] 我确定我的操作无误，是程序本身错误 / I confirm that my operation is correct and this is a program error  
+- [ ] 我确定这个问题还未在最新的发布版本被解决 / I confirm that this issue has not been resolved in the latest release version  
+- [ ] 我确定此问题不是重复问题 / I confirm that this is not a duplicate issue
