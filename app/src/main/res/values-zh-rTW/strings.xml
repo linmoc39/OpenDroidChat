@@ -5,6 +5,7 @@
     <!-- 導航欄 -->
     <string name="nav_chat">聊天</string>
     <string name="nav_models">模型</string>
+    <string name="nav_mcp">MCP</string>
     <string name="nav_settings">設定</string>
 
     <!-- 聊天介面 -->
@@ -177,4 +178,36 @@
     <string name="error_no_gemini_response">未能獲取到 Gemini API 響應。</string>
     <string name="error_no_claude_response">未能獲取到 Claude API 響應。</string>
     <string name="error_unknown">未知錯誤</string>
+
+    <!-- MCP 伺服器介面 -->
+    <string name="mcp_settings_title">MCP 伺服器</string>
+    <string name="mcp_settings_add">新增伺服器</string>
+    <string name="mcp_settings_empty">您尚未設定任何 MCP 伺服器。\n點擊右下角的 \'+\' 按鈕開始新增。</string>
+    <string name="mcp_back">返回</string>
+
+    <string name="mcp_edit_title_add">新增 MCP 伺服器</string>
+    <string name="mcp_edit_title_edit">設定 MCP 伺服器</string>
+    <string name="mcp_edit_save_add">儲存</string>
+    <string name="mcp_edit_save_edit">儲存修改</string>
+    <string name="mcp_edit_section_basic">基本資訊</string>
+    <string name="mcp_edit_name">伺服器名稱</string>
+    <string name="mcp_edit_name_hint">例如：天氣服務</string>
+    <string name="mcp_edit_url">伺服器位址 (URL)</string>
+    <string name="mcp_edit_url_hint">https://mcp.example.com/mcp</string>
+    <string name="mcp_edit_api_key">API 金鑰（選填）</string>
+    <string name="mcp_edit_api_key_hint">若伺服器需要驗證則填寫，留空表示不需要</string>
+    <string name="mcp_edit_section_advanced">描述與啟用</string>
+    <string name="mcp_edit_description">描述</string>
+    <string name="mcp_edit_description_hint">說明該伺服器提供的工具能力…</string>
+    <string name="mcp_edit_enabled">啟用該伺服器</string>
+    <string name="mcp_edit_enabled_desc">開啟後模型可呼叫此伺服器提供的工具</string>
+
+    <!-- 模型編輯介面的 MCP 開關 -->
+    <string name="model_edit_enable_mcp">允許呼叫 MCP 伺服器</string>
+    <string name="model_edit_enable_mcp_desc">開啟後模型可呼叫已啟用的 MCP 工具</string>
+
+    <!-- 訊息泡泡 MCP 呼叫容器 -->
+    <string name="message_mcp_tools_title">MCP 工具呼叫 (%1$d)</string>
+    <string name="message_mcp_call_item">%1$s · %2$s · %3$d ms</string>
+    <string name="message_mcp_loading">正在呼叫 %1$s · %2$s…</string>
 </resources>

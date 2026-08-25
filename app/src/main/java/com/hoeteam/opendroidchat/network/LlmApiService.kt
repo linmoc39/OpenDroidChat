@@ -115,7 +115,8 @@ class LlmApiService {
     // 流式传输
     fun sendChatStream(
         messages: List<ApiMessage>,
-        config: LlmModel
+        config: LlmModel,
+        extraSystemPrompt: String = ""
     ): Flow<StreamChunk> = flow {
         var apiUrl = config.customApiUrl.takeIf { it?.isNotBlank() == true } ?: getApiUrl(config.provider, true)
         val apiKey = config.apiKey
@@ -128,20 +129,26 @@ class LlmApiService {
             apiUrl = apiUrl.replace(modelNamePlaceholder, config.modelName)
         }
 
-        val systemMessage = ApiMessage(role = "system", content = config.systemPrompt)
+        // 若提供了附加系统提示（如 MCP 工具说明），则合并到系统消息中
+        val systemText = if (extraSystemPrompt.isBlank()) {
+            config.systemPrompt
+        } else {
+            config.systemPrompt.ifBlank { "" } + "\n\n" + extraSystemPrompt
+        }
+        val systemMessage = ApiMessage(role = "system", content = systemText)
         val fullMessages = listOf(systemMessage) + messages
 
         if (config.provider == LlmProvider.Claude) {
             // ===== Claude 流式请求 =====
             val claudeMessages = fullMessages.map { ClaudeApiMessage(role = it.role, content = it.content) }
-            val systemText = config.systemPrompt.ifBlank { null }
+            val claudeSystemText = systemText.ifBlank { null }
             val claudeThinking = buildClaudeThinkingConfig(config)
 
             val requestBody = ClaudeChatRequest(
                 model = config.modelName,
                 messages = claudeMessages.filterNot { it.role == "system" },
                 stream = true,
-                system = systemText,
+                system = claudeSystemText,
                 thinking = claudeThinking,
                 outputConfig = if (claudeThinking?.type == "adaptive" && config.reasoningEffort != null) {
                     ClaudeOutputConfig(effort = config.reasoningEffort)
@@ -316,7 +323,8 @@ class LlmApiService {
     // 非流式传输
     suspend fun sendChat(
         messages: List<ApiMessage>,
-        config: LlmModel
+        config: LlmModel,
+        extraSystemPrompt: String = ""
     ): ChatResult {
         var apiUrl = config.customApiUrl.takeIf { it?.isNotBlank() == true } ?: getApiUrl(config.provider, false)
         val apiKey = config.apiKey
@@ -329,16 +337,164 @@ class LlmApiService {
             apiUrl = apiUrl.replace(modelNamePlaceholder, config.modelName)
         }
 
-        val systemMessage = ApiMessage(role = "system", content = config.systemPrompt)
+        // 若提供了附加系统提示（如 MCP 工具说明），则合并到系统消息中
+        val systemText = if (extraSystemPrompt.isBlank()) {
+            config.systemPrompt
+        } else {
+            config.systemPrompt.ifBlank { "" } + "\n\n" + extraSystemPrompt
+        }
+        val systemMessage = ApiMessage(role = "system", content = systemText)
         val fullMessages = listOf(systemMessage) + messages
 
         if (config.provider == LlmProvider.Claude) {
-            return sendClaudeChat(apiUrl, apiKey, config, fullMessages)
+            return sendClaudeChat(apiUrl, apiKey, config, fullMessages, systemText)
         } else if (config.provider == LlmProvider.Gemini) {
             return sendGeminiChat(apiUrl, apiKey, config, fullMessages)
         } else {
             return sendOpenAiChat(apiUrl, apiKey, config, fullMessages)
         }
+    }
+
+    /**
+     * 支持 MCP 工具调用的非流式聊天。
+     * 流程：
+     *  1. 拉取所有已启用服务器的工具列表并注入系统提示。
+     *  2. 调用模型，解析其中形如 [MCP_CALL]{...} 的工具调用标记。
+     *  3. 若存在工具调用，则执行对应工具、记录耗时，并把结果回填给模型再次调用。
+     *  4. 循环直至模型不再请求工具调用（或达到最大迭代次数）。
+     */
+    suspend fun sendChatWithMcp(
+        messages: List<ApiMessage>,
+        config: LlmModel,
+        mcpServers: List<McpServer>,
+        stream: Boolean = false,
+        onChunk: (suspend (content: String, reasoningText: String?) -> Unit)? = null,
+        onToolStart: (suspend (serverName: String, toolName: String) -> Unit)? = null
+    ): ChatResult {
+        val mcpClient = McpClient()
+        val toolPrompt = StringBuilder()
+        val usableServers = mutableListOf<Pair<McpServer, List<McpTool>>>()
+
+        for (server in mcpServers) {
+            val tools = mcpClient.listTools(server)
+            if (tools.isEmpty()) continue
+            usableServers += server to tools
+            toolPrompt.append("MCP 服务器 \"${server.name}\" 提供以下工具：\n")
+            tools.forEach { tool ->
+                toolPrompt.append("  - 工具名: ${tool.name}\n")
+                if (tool.description.isNotBlank()) {
+                    toolPrompt.append("    描述: ${tool.description}\n")
+                }
+                if (!tool.inputSchema.isNullOrBlank()) {
+                    toolPrompt.append("    参数 (JSON Schema): ${tool.inputSchema}\n")
+                }
+            }
+        }
+
+        if (usableServers.isEmpty()) {
+            // 没有可用工具，退化为普通聊天
+            return sendChat(messages, config)
+        }
+
+        toolPrompt.append("\n当需要调用上述工具时，你必须输出一行恰好包含以下内容的标记，然后停止并等待结果：\n")
+        toolPrompt.append("[MCP_CALL]{\"server\":\"<服务器名>\",\"tool\":\"<工具名>\",\"arguments\":{...}}\n")
+        toolPrompt.append("收到工具结果后，再继续回答用户的问题。\n")
+
+        val collectedCalls = mutableListOf<McpCallInfo>()
+        var workingMessages = messages
+        val maxIterations = 6
+
+        repeat(maxIterations) {
+            // 获取本轮（可能含工具调用）的完整文本，以及供 UI 展示的思考内容
+            var roundText: String
+            var reasoning: String? = null
+
+            if (stream && onChunk != null) {
+                // === 真·流式：每轮都用 sendChatStream 单次生成，边生成边推送 ===
+                val roundContent = StringBuilder()
+                var pending = StringBuilder()
+                sendChatStream(workingMessages, config, extraSystemPrompt = toolPrompt.toString())
+                    .collect { chunk ->
+                        if (!chunk.reasoningText.isNullOrBlank()) {
+                            reasoning = chunk.reasoningText
+                            onChunk("", chunk.reasoningText)
+                        }
+                        roundContent.append(chunk.content)
+                        pending.append(chunk.content)
+                        // 去掉本轮已完整的 [MCP_CALL] 标记，避免把标记显示给用户
+                        for (b in McpClient.extractMcpCallBlocks(pending.toString())) {
+                            val bi = pending.indexOf(b)
+                            if (bi >= 0) pending.delete(bi, bi + b.length)
+                        }
+                        val text = pending.toString()
+                        val hold = McpClient.holdBackLength(text)
+                        val emitLen = text.length - hold
+                        if (emitLen > 0) {
+                            onChunk(text.substring(0, emitLen), null)
+                            pending = StringBuilder(text.substring(emitLen))
+                        }
+                    }
+                // 冲刷尾部（非标记文本）
+                if (pending.isNotBlank()) {
+                    val leftover = McpClient.stripMcpCalls(pending.toString())
+                    if (leftover.isNotBlank()) onChunk(leftover, null)
+                }
+                roundText = roundContent.toString()
+            } else {
+                // === 非流式：单次调用获取本轮文本 ===
+                val result = sendChat(workingMessages, config, extraSystemPrompt = toolPrompt.toString())
+                roundText = result.content
+                reasoning = result.reasoningText
+            }
+
+            val calls = McpClient.parseMcpCalls(roundText)
+            if (calls.isEmpty()) {
+                // 最终答案
+                return ChatResult(
+                    content = McpClient.stripMcpCalls(roundText),
+                    reasoningText = reasoning,
+                    mcpCalls = collectedCalls
+                )
+            }
+
+            // 将模型的工具调用请求追加到消息历史（用可读文本代替原始标记，避免模型再次输出 [MCP_CALL]）
+            val updatedMessages = workingMessages.toMutableList()
+            val toolNames = calls.joinToString(", ") { it.tool }
+            updatedMessages += ApiMessage(
+                role = "assistant",
+                content = "我已请求调用 MCP 工具：$toolNames，正在等待结果。"
+            )
+
+            for (call in calls) {
+                val pair = usableServers.firstOrNull { it.first.name == call.server }
+                if (pair == null) {
+                    updatedMessages += ApiMessage(
+                        role = "system",
+                        content = "错误：未找到 MCP 服务器 \"${call.server}\"。"
+                    )
+                    continue
+                }
+                val server = pair.first
+                onToolStart?.invoke(server.name, call.tool)
+                val startTime = System.currentTimeMillis()
+                val output = mcpClient.callTool(server, call.tool, call.arguments)
+                val duration = System.currentTimeMillis() - startTime
+                collectedCalls += McpCallInfo(serverName = server.name, toolName = call.tool, durationMs = duration)
+                updatedMessages += ApiMessage(
+                    role = "system",
+                    content = "工具 \"${call.tool}\"（服务器 ${server.name}）返回结果：\n$output"
+                )
+            }
+            workingMessages = updatedMessages
+        }
+
+        // 达到最大迭代次数仍无法收敛，返回最后一次结果
+        val last = sendChat(workingMessages, config, extraSystemPrompt = toolPrompt.toString())
+        return ChatResult(
+            content = McpClient.stripMcpCalls(last.content),
+            reasoningText = last.reasoningText,
+            mcpCalls = collectedCalls
+        )
     }
 
     // OpenAI 格式的非流式请求
@@ -442,10 +598,11 @@ class LlmApiService {
         apiUrl: String,
         apiKey: String,
         config: LlmModel,
-        fullMessages: List<ApiMessage>
+        fullMessages: List<ApiMessage>,
+        systemTextOverride: String = ""
     ): ChatResult {
         val claudeMessages = fullMessages.map { ClaudeApiMessage(role = it.role, content = it.content) }
-        val systemText = config.systemPrompt.ifBlank { null }
+        val systemText = (systemTextOverride.ifBlank { config.systemPrompt }).ifBlank { null }
         val claudeThinking = buildClaudeThinkingConfig(config)
 
         val requestBody = ClaudeChatRequest(
@@ -545,7 +702,8 @@ data class StreamChunk(
  */
 data class ChatResult(
     val content: String,
-    val reasoningText: String? = null
+    val reasoningText: String? = null,
+    val mcpCalls: List<McpCallInfo> = emptyList() // 本次回复中调用的 MCP 工具记录
 )
 
 /**

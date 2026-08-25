@@ -33,7 +33,8 @@ data class LlmModel(
     val appId: String? = null,
     val useStream: Boolean = true, // 是否使用流式传输，默认为 true
     val enableThinking: Boolean = false, // 是否启用思考模式
-    val reasoningEffort: String? = null // 思考深度（OpenAI: low/medium/high, DeepSeek: high/max, Claude: low/medium/high/xhigh）
+    val reasoningEffort: String? = null, // 思考深度（OpenAI: low/medium/high, DeepSeek: high/max, Claude: low/medium/high/xhigh）
+    val enableMcp: Boolean = false // 是否允许该模型调用 MCP 服务器工具
 
 )
 
@@ -47,7 +48,8 @@ data class Message(
     val isStreaming: Boolean = false,
     val isThinkingStreaming: Boolean = false, // 思考内容是否仍在流式传输
     val selectedFile: SelectedFile? = null,
-    val reasoningText: String? = null // 思考内容（reasoning/reasoning_text）
+    val reasoningText: String? = null, // 思考内容（reasoning/reasoning_text）
+    val mcpCalls: List<McpCallInfo> = emptyList() // 本次回复中调用的 MCP 服务器工具记录
 )
 
 enum class Sender {

@@ -5,6 +5,7 @@
     <!-- 导航栏 -->
     <string name="nav_chat">聊天</string>
     <string name="nav_models">模型</string>
+    <string name="nav_mcp">MCP</string>
     <string name="nav_settings">设置</string>
 
     <!-- 聊天界面 -->
@@ -177,4 +178,36 @@
     <string name="error_no_gemini_response">未能获取到 Gemini API 响应。</string>
     <string name="error_no_claude_response">未能获取到 Claude API 响应。</string>
     <string name="error_unknown">未知错误</string>
+
+    <!-- MCP 服务器界面 -->
+    <string name="mcp_settings_title">MCP 服务器</string>
+    <string name="mcp_settings_add">添加服务器</string>
+    <string name="mcp_settings_empty">您还没有配置任何 MCP 服务器。\n点击右下角的 \'+\' 按钮开始添加。</string>
+    <string name="mcp_back">返回</string>
+
+    <string name="mcp_edit_title_add">添加 MCP 服务器</string>
+    <string name="mcp_edit_title_edit">配置 MCP 服务器</string>
+    <string name="mcp_edit_save_add">保存</string>
+    <string name="mcp_edit_save_edit">保存修改</string>
+    <string name="mcp_edit_section_basic">基本信息</string>
+    <string name="mcp_edit_name">服务器名称</string>
+    <string name="mcp_edit_name_hint">例如：天气服务</string>
+    <string name="mcp_edit_url">服务器地址 (URL)</string>
+    <string name="mcp_edit_url_hint">https://mcp.example.com/mcp</string>
+    <string name="mcp_edit_api_key">API 密钥 (可选)</string>
+    <string name="mcp_edit_api_key_hint">如服务器需要身份验证则填写，留空表示无需</string>
+    <string name="mcp_edit_section_advanced">描述与启用</string>
+    <string name="mcp_edit_description">描述</string>
+    <string name="mcp_edit_description_hint">说明该服务器提供的工具能力…</string>
+    <string name="mcp_edit_enabled">启用该服务器</string>
+    <string name="mcp_edit_enabled_desc">开启后模型可调用此服务器提供的工具</string>
+
+    <!-- 模型编辑界面的 MCP 开关 -->
+    <string name="model_edit_enable_mcp">允许调用 MCP 服务器</string>
+    <string name="model_edit_enable_mcp_desc">开启后模型可调用已启用的 MCP 工具</string>
+
+    <!-- 消息气泡 MCP 调用容器 -->
+    <string name="message_mcp_tools_title">MCP 工具调用 (%1$d)</string>
+    <string name="message_mcp_call_item">%1$s · %2$s · %3$d ms</string>
+    <string name="message_mcp_loading">正在调用 %1$s · %2$s…</string>
 </resources>

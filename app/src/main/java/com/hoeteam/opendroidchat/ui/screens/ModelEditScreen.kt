@@ -60,6 +60,7 @@ fun ModelEditScreen(
         mutableStateOf(modelToEdit?.useStream ?: (provider != LlmProvider.Custom))
     }
     var enableThinking by remember(modelToEdit) { mutableStateOf(modelToEdit?.enableThinking ?: false) }
+    var enableMcp by remember(modelToEdit) { mutableStateOf(modelToEdit?.enableMcp ?: false) }
     var reasoningEffort by remember(modelToEdit) {
         mutableStateOf(modelToEdit?.reasoningEffort ?: "high")
     }
@@ -133,7 +134,8 @@ fun ModelEditScreen(
                             appId = appId.trim().takeIf { it.isNotBlank() },
                             useStream = if (provider == LlmProvider.Custom) useStream else true,
                             enableThinking = enableThinking,
-                            reasoningEffort = if (enableThinking && supportsReasoningEffort) reasoningEffort else null
+                            reasoningEffort = if (enableThinking && supportsReasoningEffort) reasoningEffort else null,
+                            enableMcp = enableMcp
                         )
                         viewModel.addOrUpdateModel(newModel)
                         onSave()
@@ -371,6 +373,26 @@ fun ModelEditScreen(
                         }
                     }
                 }
+
+                // ===== MCP 工具调用开关 =====
+                Spacer(modifier = Modifier.height(12.dp))
+                HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(stringResource(R.string.model_edit_enable_mcp), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.model_edit_enable_mcp_desc), style = MaterialTheme.typography.bodySmall)
+                    }
+                    Switch(checked = enableMcp, onCheckedChange = { enableMcp = it })
+                }
+
             }
 
             Spacer(modifier = Modifier.height(32.dp))

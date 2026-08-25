@@ -59,6 +59,8 @@ import com.hoeteam.opendroidchat.ui.screens.ChatScreen
 import com.hoeteam.opendroidchat.ui.screens.ModelEditScreen
 import com.hoeteam.opendroidchat.ui.screens.ModelSettingsScreen
 import com.hoeteam.opendroidchat.ui.screens.SettingsScreen
+import com.hoeteam.opendroidchat.ui.screens.McpScreen
+import com.hoeteam.opendroidchat.ui.screens.McpServerEditScreen
 import com.hoeteam.opendroidchat.ui.screens.AboutScreen
 import com.hoeteam.opendroidchat.ui.screens.LegalScreen
 import com.hoeteam.opendroidchat.ui.screens.LicenseScreen
@@ -259,6 +261,9 @@ object Destinations {
     const val LICENSE_SCREEN = "license_screen"
     const val ARG_MODEL_ID = "modelId"
     const val LEGAL_SCREEN = "legal"
+    const val MCP_SCREEN = "mcp_servers"
+    const val MCP_EDIT = "edit_mcp/{serverId}"
+    const val ARG_MCP_SERVER_ID = "serverId"
 }
 
 @Composable
@@ -271,6 +276,7 @@ fun MainNavigation(themeViewModel: ThemeViewModel) {
     val screens = listOf(
         Destinations.CHAT_SCREEN to stringResource(R.string.nav_chat),
         Destinations.MODEL_SETTINGS to stringResource(R.string.nav_models),
+        Destinations.MCP_SCREEN to stringResource(R.string.nav_mcp),
         Destinations.SETTINGS_SCREEN to stringResource(R.string.nav_settings)
     )
 
@@ -309,6 +315,7 @@ fun MainNavigation(themeViewModel: ThemeViewModel) {
                                 when (route) {
                                     Destinations.CHAT_SCREEN -> Icon(Icons.AutoMirrored.Filled.Chat, contentDescription = label)
                                     Destinations.MODEL_SETTINGS -> Icon(Icons.AutoMirrored.Filled.List, contentDescription = label)
+                                    Destinations.MCP_SCREEN -> Icon(Icons.Filled.Storage, contentDescription = label)
                                     Destinations.SETTINGS_SCREEN -> Icon(Icons.Filled.Settings, contentDescription = label)
                                     else -> Icon(Icons.Filled.MoreVert, contentDescription = label)
                                 }
@@ -328,6 +335,7 @@ fun MainNavigation(themeViewModel: ThemeViewModel) {
                                 when (route) {
                                     Destinations.CHAT_SCREEN -> Icon(Icons.AutoMirrored.Filled.Chat, contentDescription = label)
                                     Destinations.MODEL_SETTINGS -> Icon(Icons.AutoMirrored.Filled.List, contentDescription = label)
+                                    Destinations.MCP_SCREEN -> Icon(Icons.Filled.Storage, contentDescription = label)
                                     Destinations.SETTINGS_SCREEN -> Icon(Icons.Filled.Settings, contentDescription = label)
                                     else -> Icon(Icons.Filled.MoreVert, contentDescription = label)
                                 }
@@ -428,6 +436,40 @@ fun MainNavigation(themeViewModel: ThemeViewModel) {
             composable(Destinations.LEGAL_SCREEN) {
                 LegalScreen(
                     onBack = { navController.popBackStack() } // 返回到 AboutScreen
+                )
+            }
+
+            // 8. MCP 服务器管理页面
+            composable(Destinations.MCP_SCREEN) {
+                McpScreen(
+                    viewModel = viewModel,
+                    onNavigateToEditServer = { serverId ->
+                        navController.navigate("edit_mcp/$serverId")
+                    }
+                )
+            }
+
+            // 9. MCP 服务器编辑/新增页面
+            composable(
+                Destinations.MCP_EDIT,
+                arguments = listOf(navArgument(Destinations.ARG_MCP_SERVER_ID) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                })
+            ) { backStackEntry ->
+                val serverId = backStackEntry.arguments?.getString(Destinations.ARG_MCP_SERVER_ID)
+
+                val mcpServerList by viewModel.mcpServers.collectAsState()
+
+                val serverToEdit = remember(serverId) {
+                    mcpServerList.find { it.id == serverId }
+                }
+
+                McpServerEditScreen(
+                    viewModel = viewModel,
+                    serverToEdit = serverToEdit,
+                    onSave = { navController.popBackStack() }
                 )
             }
         }

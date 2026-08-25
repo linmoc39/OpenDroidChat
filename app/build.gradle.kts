@@ -16,8 +16,8 @@ android {
         applicationId = "com.hoeteam.opendroidchat"
         minSdk = 23
         targetSdk = 36
-        versionCode = 24
-        versionName = "Beta-1.12-HelloWorld"
+        versionCode = 25
+        versionName = "Beta-1.13-MCP"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -103,7 +103,6 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.androidx.compose.ui.graphics)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -131,8 +130,8 @@ dependencies {
     // Markdown 渲染 (直接使用 Markwon 以支持深色模式下行内代码主题)
     implementation("io.noties.markwon:core:4.6.2")
 
-    implementation("androidx.compose.material:material-icons-core:1.7.8")
-    implementation("androidx.compose.material:material-icons-extended:1.7.8")
+    implementation("androidx.compose.material:material-icons-core")
+    implementation("androidx.compose.material:material-icons-extended")
 
     // AppCompat (用于 AppCompatDelegate.setApplicationLocales 多语言支持)
     implementation("androidx.appcompat:appcompat:1.7.0")

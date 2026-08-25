@@ -36,10 +36,12 @@ class SettingsRepository(private val context: Context) {
         val DARK_THEME_ENABLED = booleanPreferencesKey("dark_theme_enabled")
         val AUTO_UPDATE_CHECK = booleanPreferencesKey("auto_update_check")
         val APP_LANGUAGE = stringPreferencesKey("app_language")
+        val MCP_SERVERS_LIST = stringPreferencesKey("mcp_servers_list")
     }
 
     private val gson = Gson()
     private val listType = object : TypeToken<List<LlmModel>>() {}.type
+    private val mcpServerListType = object : TypeToken<List<McpServer>>() {}.type
 
     // 内存缓存：缓存解密后的模型列表，避免重复解析 JSON 和解密 API Key
     @Volatile
@@ -67,10 +69,10 @@ class SettingsRepository(private val context: Context) {
 
         // 遍历列表，解密 API Key
         val decryptedModels = modelsToDecrypt.map { model ->
-            // 检查是否有加密标记
-            if (model.apiKey.startsWith("encrypted:")) {
+            // 检查是否有加密标记（apiKey 可能为 null：异常/旧数据）
+            if (model.apiKey?.startsWith("encrypted:") == true) {
                 try {
-                    val storageString = model.apiKey.substringAfter("encrypted:")
+                    val storageString = model.apiKey!!.substringAfter("encrypted:")
                     val wrapper = storageString.toCiphertextWrapper()
                     val decryptedKey = encryptionUtil.decrypt(wrapper)
 
@@ -152,6 +154,88 @@ class SettingsRepository(private val context: Context) {
         }
     }
 
+    // ==================== MCP 服务器设置 ====================
+
+    // 12. MCP 服务器列表 Flow (READ: 读取后解密 API Key)
+    val mcpServersFlow: Flow<List<McpServer>> = dataStore.data.map { preferences ->
+        val jsonString = preferences[PreferencesKeys.MCP_SERVERS_LIST] ?: "[]"
+        val servers = gson.fromJson<List<McpServer>>(jsonString, mcpServerListType) ?: emptyList()
+        servers.map { server ->
+            // 检查是否有加密标记（apiKey 可能为 null：旧数据未包含该字段）
+            if (server.apiKey?.startsWith("encrypted:") == true) {
+                try {
+                    val storageString = server.apiKey!!.substringAfter("encrypted:")
+                    val wrapper = storageString.toCiphertextWrapper()
+                    server.copy(apiKey = encryptionUtil.decrypt(wrapper))
+                } catch (e: Exception) {
+                    server.copy(apiKey = "")
+                }
+            } else {
+                // 未加密的 Key 出于安全考虑不返回明文
+                server.copy(apiKey = "")
+            }
+        }
+    }
+
+    // 13. 添加或更新 MCP 服务器
+    suspend fun addOrUpdateMcpServer(server: McpServer) {
+        mcpServersFlow.firstOrNull()?.let { currentServers ->
+            val updatedList = currentServers
+                .filter { it.id != server.id }
+                .toMutableList()
+            updatedList.add(server)
+            saveMcpServersList(updatedList)
+        }
+    }
+
+    // 14. 删除 MCP 服务器
+    suspend fun deleteMcpServer(server: McpServer) {
+        mcpServersFlow.firstOrNull()?.let { currentServers ->
+            val updatedList = currentServers.filter { it.id != server.id }
+            saveMcpServersList(updatedList)
+        }
+    }
+
+    // 15. 更新某个 MCP 服务器的启用状态
+    suspend fun setMcpServerEnabled(serverId: String, enabled: Boolean) {
+        mcpServersFlow.firstOrNull()?.let { currentServers ->
+            val updatedList = currentServers.map { server ->
+                if (server.id == serverId) server.copy(enabled = enabled) else server
+            }
+            saveMcpServersList(updatedList)
+        }
+    }
+
+    // 内部函数：保存整个 MCP 服务器列表 (WRITE: 加密 API Key 后保存)
+    private suspend fun saveMcpServersList(servers: List<McpServer>) {
+        // 在后台线程执行加密操作
+        withContext(Dispatchers.Default) {
+            val serversToSave = servers.map { server ->
+                val key = server.apiKey.orEmpty()
+                if (key.isNotEmpty()) {
+                    // 只有当传入的是明文（没有 "encrypted:" 前缀）时才进行加密
+                    if (!key.startsWith("encrypted:")) {
+                        try {
+                            val wrapper = encryptionUtil.encrypt(key)
+                            server.copy(apiKey = "encrypted:${wrapper.toStorageString()}")
+                        } catch (e: Exception) {
+                            server.copy(apiKey = "")
+                        }
+                    } else {
+                        server // 已经加密的直接使用
+                    }
+                } else {
+                    server.copy(apiKey = "") // Key 为空时，清空
+                }
+            }
+
+            dataStore.edit { preferences ->
+                val jsonString = gson.toJson(serversToSave)
+                preferences[PreferencesKeys.MCP_SERVERS_LIST] = jsonString
+            }
+        }
+    }
+
     // 4. 添加新模型 (或更新现有模型)
     suspend fun addOrUpdateModel(newModel: LlmModel) {
         // 先获取明文列表
@@ -179,11 +263,12 @@ class SettingsRepository(private val context: Context) {
         withContext(Dispatchers.Default) {
             // 遍历列表，加密 API Key
             val modelsToSave = models.map { model ->
-                if (model.apiKey.isNotEmpty()) {
+                val key = model.apiKey.orEmpty()
+                if (key.isNotEmpty()) {
                     // 只有当传入的 Key 是明文时（没有 "encrypted:" 前缀）才进行加密
-                    if (!model.apiKey.startsWith("encrypted:")) {
+                    if (!key.startsWith("encrypted:")) {
                         try {
-                            val wrapper = encryptionUtil.encrypt(model.apiKey)
+                            val wrapper = encryptionUtil.encrypt(key)
                             val storageString = wrapper.toStorageString()
 
                             // 存储加密后的 key，并加上前缀标记

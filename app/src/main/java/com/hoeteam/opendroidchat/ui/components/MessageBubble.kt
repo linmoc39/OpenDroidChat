@@ -36,6 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.hoeteam.opendroidchat.data.McpCallInfo
 import com.hoeteam.opendroidchat.data.Message
 import com.hoeteam.opendroidchat.data.Sender
 import kotlinx.coroutines.delay
@@ -134,6 +135,12 @@ fun MessageBubble(
                                 isStreaming = message.isThinkingStreaming
                             )
                         }
+
+                        // MCP 工具调用记录（如果有）
+                        if (message.mcpCalls.isNotEmpty()) {
+                            McpCallsBlock(calls = message.mcpCalls)
+                        }
+
 
                         // 常规内容
                         if (message.text.isNotBlank()) {
@@ -277,3 +284,95 @@ private fun FileInfoChip(
         }
     }
 }
+
+@Composable
+private fun McpCallsBlock(calls: List<McpCallInfo>) {
+    val context = LocalContext.current
+    var expanded by remember { mutableStateOf(true) }
+
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
+        ) {
+            // 标题栏 - 可折叠
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { expanded = !expanded },
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = context.getString(
+                        com.hoeteam.opendroidchat.R.string.message_mcp_tools_title,
+                        calls.size
+                    ),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Icon(
+                    imageVector = if (expanded) Icons.Default.KeyboardArrowDown else Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+
+            // 调用详情
+            AnimatedVisibility(visible = expanded) {
+                Column(modifier = Modifier.padding(top = 8.dp)) {
+                    calls.forEach { call ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 2.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (call.pending) {
+                                // 调用进行中：显示加载转圈
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(14.dp),
+                                    strokeWidth = 2.dp,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = context.getString(
+                                        com.hoeteam.opendroidchat.R.string.message_mcp_loading,
+                                        call.serverName,
+                                        call.toolName
+                                    ),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f)
+                                )
+                            } else {
+                                Text(
+                                    text = context.getString(
+                                        com.hoeteam.opendroidchat.R.string.message_mcp_call_item,
+                                        call.serverName,
+                                        call.toolName,
+                                        call.durationMs
+                                    ),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+

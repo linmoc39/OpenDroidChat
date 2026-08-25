@@ -44,6 +44,12 @@ class ChatViewModel(
         initialValue = emptyList()
     )
 
+    val mcpServers: StateFlow<List<McpServer>> = settingsRepository.mcpServersFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = emptyList()
+    )
+
     private val _messages = MutableStateFlow<List<Message>>(emptyList())
     val messages: StateFlow<List<Message>> = _messages.asStateFlow()
 
@@ -150,13 +156,92 @@ class ChatViewModel(
     }
 
     /**
-     * 执行聊天请求（流式/非流式）
+     * 执行聊天请求（流式/非流式 / MCP 工具调用）
      */
     private suspend fun executeChatRequest(currentModel: LlmModel, apiMessages: List<ApiMessage>) {
+        val enabledServers = mcpServers.value.filter { it.enabled }
+        if (currentModel.enableMcp && enabledServers.isNotEmpty()) {
+            executeMcpRequest(currentModel, apiMessages, enabledServers)
+            return
+        }
         if (currentModel.useStream) {
             executeStreamingRequest(currentModel, apiMessages)
         } else {
             executeNonStreamingRequest(currentModel, apiMessages)
+        }
+    }
+
+    private suspend fun executeMcpRequest(
+        currentModel: LlmModel,
+        apiMessages: List<ApiMessage>,
+        mcpServers: List<McpServer>
+    ) {
+        val useStream = currentModel.useStream
+        val msgId = System.currentTimeMillis() + 1
+
+        // 先插入占位消息：流式模式用于打字机效果；同时用于展示 MCP 调用容器（含加载转圈）
+        _messages.update { it + Message(id = msgId, text = "", sender = Sender.LLM, isStreaming = useStream) }
+
+        try {
+            val result = apiService.sendChatWithMcp(
+                apiMessages, currentModel, mcpServers,
+                stream = useStream,
+                onChunk = if (useStream) { content, reasoningText ->
+                    _messages.update { list ->
+                        list.map { m ->
+                            if (m.id == msgId) {
+                                m.copy(
+                                    text = if (content.isEmpty()) m.text else m.text + content,
+                                    reasoningText = reasoningText ?: m.reasoningText,
+                                    isStreaming = true,
+                                    isThinkingStreaming = !reasoningText.isNullOrBlank()
+                                )
+                            } else m
+                        }
+                    }
+                } else null,
+                onToolStart = { serverName, toolName ->
+                    // 工具调用开始：在 MCP 容器中追加一条"进行中"记录（显示加载转圈）
+                    _messages.update { list ->
+                        list.map { m ->
+                            if (m.id == msgId) {
+                                m.copy(
+                                    mcpCalls = m.mcpCalls + McpCallInfo(
+                                        serverName = serverName,
+                                        toolName = toolName,
+                                        durationMs = 0,
+                                        pending = true
+                                    )
+                                )
+                            } else m
+                        }
+                    }
+                }
+            )
+            // 最终化消息
+            _messages.update { list ->
+                list.map { m ->
+                    if (m.id == msgId) {
+                        m.copy(
+                            text = result.content,
+                            reasoningText = result.reasoningText,
+                            isStreaming = false,
+                            isThinkingStreaming = false,
+                            mcpCalls = result.mcpCalls
+                        )
+                    } else m
+                }
+            }
+        } catch (e: Exception) {
+            val errorMessage = "LLM API 响应出错: ${e.message ?: "未知错误"}"
+            _messages.update { list ->
+                list.map { m ->
+                    if (m.id == msgId) m.copy(text = errorMessage, isStreaming = false, isThinkingStreaming = false) else m
+                }
+            }
+            _errorState.emit(ApiErrorState("API 调用失败：${e.localizedMessage}", apiMessages))
+        } finally {
+            _isLoading.value = false
         }
     }
 
@@ -312,6 +397,26 @@ class ChatViewModel(
         viewModelScope.launch {
             settingsRepository.setCurrentModel(modelId)
             clearChat()
+        }
+    }
+
+    // ------------------- MCP 服务器配置逻辑 -------------------
+
+    fun addOrUpdateMcpServer(server: McpServer) {
+        viewModelScope.launch {
+            settingsRepository.addOrUpdateMcpServer(server)
+        }
+    }
+
+    fun deleteMcpServer(server: McpServer) {
+        viewModelScope.launch {
+            settingsRepository.deleteMcpServer(server)
+        }
+    }
+
+    fun setMcpServerEnabled(serverId: String, enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setMcpServerEnabled(serverId, enabled)
         }
     }
 }

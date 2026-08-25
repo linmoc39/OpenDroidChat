@@ -5,6 +5,7 @@
     <!-- Navigation -->
     <string name="nav_chat">Chat</string>
     <string name="nav_models">Models</string>
+    <string name="nav_mcp">MCP</string>
     <string name="nav_settings">Settings</string>
 
     <!-- Chat Screen -->
@@ -177,4 +178,36 @@
     <string name="error_no_gemini_response">Failed to get Gemini API response.</string>
     <string name="error_no_claude_response">Failed to get Claude API response.</string>
     <string name="error_unknown">Unknown error</string>
+
+    <!-- MCP Server Screens -->
+    <string name="mcp_settings_title">MCP Servers</string>
+    <string name="mcp_settings_add">Add Server</string>
+    <string name="mcp_settings_empty">You haven\'t configured any MCP servers yet.\nTap the \'+\' button at the bottom right to get started.</string>
+    <string name="mcp_back">Back</string>
+
+    <string name="mcp_edit_title_add">Add MCP Server</string>
+    <string name="mcp_edit_title_edit">Configure MCP Server</string>
+    <string name="mcp_edit_save_add">Save</string>
+    <string name="mcp_edit_save_edit">Save Changes</string>
+    <string name="mcp_edit_section_basic">Basic Info</string>
+    <string name="mcp_edit_name">Server Name</string>
+    <string name="mcp_edit_name_hint">e.g. Weather Service</string>
+    <string name="mcp_edit_url">Server URL</string>
+    <string name="mcp_edit_url_hint">https://mcp.example.com/mcp</string>
+    <string name="mcp_edit_api_key">API Key (optional)</string>
+    <string name="mcp_edit_api_key_hint">Fill in if the server requires authentication; leave empty if not</string>
+    <string name="mcp_edit_section_advanced">Description &amp; Enable</string>
+    <string name="mcp_edit_description">Description</string>
+    <string name="mcp_edit_description_hint">Describe the tools this server provides…</string>
+    <string name="mcp_edit_enabled">Enable this server</string>
+    <string name="mcp_edit_enabled_desc">When enabled, the model can call tools from this server</string>
+
+    <!-- Model Edit Screen MCP Toggle -->
+    <string name="model_edit_enable_mcp">Allow MCP Server Calls</string>
+    <string name="model_edit_enable_mcp_desc">When enabled, the model can call enabled MCP tools</string>
+
+    <!-- Message Bubble MCP Calls Container -->
+    <string name="message_mcp_tools_title">MCP tool calls (%1$d)</string>
+    <string name="message_mcp_call_item">%1$s · %2$s · %3$d ms</string>
+    <string name="message_mcp_loading">Calling %1$s · %2$s…</string>
 </resources>
