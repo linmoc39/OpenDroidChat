@@ -40,5 +40,6 @@ data class McpCallInfo(
     val serverName: String,
     val toolName: String,
     val durationMs: Long,
-    val pending: Boolean = false // true 表示调用仍在进行中（UI 显示加载转圈）
+    val pending: Boolean = false, // true 表示调用仍在进行中（UI 显示加载转圈）
+    val error: String? = null // 若调用失败，携带错误信息
 )

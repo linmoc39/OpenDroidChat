@@ -427,7 +427,10 @@ class LlmApiService {
                             if (bi >= 0) pending.delete(bi, bi + b.length)
                         }
                         val text = pending.toString()
-                        val hold = McpClient.holdBackLength(text)
+                        // 若仍存在未闭合的 [MCP_CALL]（标记可能被分块传入），则从该处起全部暂存，
+                        // 否则仅暂存可能是标记前缀的尾部，避免把 [MCP_CALL]{...} 泄漏到界面
+                        val lastMarker = text.lastIndexOf("[MCP_CALL]")
+                        val hold = if (lastMarker >= 0) text.length - lastMarker else McpClient.holdBackLength(text)
                         val emitLen = text.length - hold
                         if (emitLen > 0) {
                             onChunk(text.substring(0, emitLen), null)
@@ -472,17 +475,29 @@ class LlmApiService {
                         role = "system",
                         content = "错误：未找到 MCP 服务器 \"${call.server}\"。"
                     )
+                    collectedCalls += McpCallInfo(
+                        serverName = call.server,
+                        toolName = call.tool,
+                        durationMs = 0,
+                        error = "未找到 MCP 服务器：${call.server}"
+                    )
                     continue
                 }
                 val server = pair.first
                 onToolStart?.invoke(server.name, call.tool)
                 val startTime = System.currentTimeMillis()
-                val output = mcpClient.callTool(server, call.tool, call.arguments)
+                val result = mcpClient.callTool(server, call.tool, call.arguments)
+                val error = if (result.isError) result.text else null
                 val duration = System.currentTimeMillis() - startTime
-                collectedCalls += McpCallInfo(serverName = server.name, toolName = call.tool, durationMs = duration)
+                collectedCalls += McpCallInfo(
+                    serverName = server.name,
+                    toolName = call.tool,
+                    durationMs = duration,
+                    error = error
+                )
                 updatedMessages += ApiMessage(
                     role = "system",
-                    content = "工具 \"${call.tool}\"（服务器 ${server.name}）返回结果：\n$output"
+                    content = "工具 \"${call.tool}\"（服务器 ${server.name}）返回结果：\n${result.text}"
                 )
             }
             workingMessages = updatedMessages
