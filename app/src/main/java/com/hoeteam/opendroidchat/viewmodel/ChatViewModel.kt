@@ -186,7 +186,7 @@ class ChatViewModel(
             val result = apiService.sendChatWithMcp(
                 apiMessages, currentModel, mcpServers,
                 stream = useStream,
-                onChunk = if (useStream) { content, reasoningText ->
+                onChunk = { content: String, reasoningText: String? ->
                     _messages.update { list ->
                         list.map { m ->
                             if (m.id == msgId) {
@@ -199,35 +199,83 @@ class ChatViewModel(
                             } else m
                         }
                     }
-                } else null,
-                onToolStart = { serverName, toolName ->
+                },
+                onToolStart = { serverName: String, toolName: String ->
                     // 工具调用开始：在 MCP 容器中追加一条"进行中"记录（显示加载转圈）
                     _messages.update { list ->
                         list.map { m ->
                             if (m.id == msgId) {
-                                m.copy(
-                                    mcpCalls = m.mcpCalls + McpCallInfo(
-                                        serverName = serverName,
-                                        toolName = toolName,
-                                        durationMs = 0,
-                                        pending = true
+                                val segments = m.segments.toMutableList()
+                                if (!m.reasoningText.isNullOrBlank()) {
+                                    segments += McpSegment.Thinking(m.reasoningText)
+                                }
+                                val last = segments.lastOrNull()
+                                if (last is McpSegment.Calls) {
+                                    segments[segments.size - 1] = McpSegment.Calls(
+                                        last.calls + McpCallInfo(serverName = serverName, toolName = toolName, durationMs = 0, pending = true)
                                     )
+                                } else {
+                                    segments += McpSegment.Calls(
+                                        listOf(McpCallInfo(serverName = serverName, toolName = toolName, durationMs = 0, pending = true))
+                                    )
+                                }
+                                m.copy(
+                                    reasoningText = null,
+                                    segments = segments
                                 )
                             } else m
                         }
                     }
-                }
+                },
+                onToolComplete = { completed: McpCallInfo ->
+                    // 工具调用完成：将"进行中"的调用替换为完成状态（立即显示）
+                    _messages.update { list ->
+                        list.map { m ->
+                            if (m.id == msgId) {
+                                var replaced = false
+                                val newSegments = m.segments.map { seg ->
+                                    if (replaced) seg
+                                    else when (seg) {
+                                        is McpSegment.Thinking -> seg
+                                        is McpSegment.Calls -> McpSegment.Calls(seg.calls.map { call ->
+                                            if (!replaced && call.pending) {
+                                                replaced = true
+                                                completed
+                                            } else call
+                                        })
+                                    }
+                                }
+                                m.copy(segments = newSegments)
+                            } else m
+                        }
+                    }
+                },
             )
             // 最终化消息
             _messages.update { list ->
                 list.map { m ->
                     if (m.id == msgId) {
+                        // 用最终结果替换"进行中"的调用信息，保留分段顺序
+                        val finalCalls = result.mcpCalls
+                        var callIdx = 0
+                        val finalizedSegments = m.segments.map { seg ->
+                            when (seg) {
+                                is McpSegment.Thinking -> seg
+                                is McpSegment.Calls -> McpSegment.Calls(seg.calls.map { call ->
+                                    if (call.pending && callIdx < finalCalls.size) {
+                                        val f = finalCalls[callIdx]
+                                        callIdx++
+                                        f
+                                    } else call
+                                })
+                            }
+                        }
                         m.copy(
                             text = result.content,
                             reasoningText = result.reasoningText,
                             isStreaming = false,
                             isThinkingStreaming = false,
-                            mcpCalls = result.mcpCalls
+                            segments = finalizedSegments
                         )
                     } else m
                 }

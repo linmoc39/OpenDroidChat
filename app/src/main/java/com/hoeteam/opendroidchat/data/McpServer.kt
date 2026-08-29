@@ -43,3 +43,12 @@ data class McpCallInfo(
     val pending: Boolean = false, // true 表示调用仍在进行中（UI 显示加载转圈）
     val error: String? = null // 若调用失败，携带错误信息
 )
+
+/**
+ * 消息中 MCP 相关的分段：思考块或 MCP 调用组，按发生顺序堆叠显示。
+ */
+@Immutable
+sealed class McpSegment {
+    data class Thinking(val text: String) : McpSegment()
+    data class Calls(val calls: List<McpCallInfo>) : McpSegment()
+}

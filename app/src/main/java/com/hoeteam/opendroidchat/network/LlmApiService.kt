@@ -129,12 +129,8 @@ class LlmApiService {
             apiUrl = apiUrl.replace(modelNamePlaceholder, config.modelName)
         }
 
-        // 若提供了附加系统提示（如 MCP 工具说明），则合并到系统消息中
-        val systemText = if (extraSystemPrompt.isBlank()) {
-            config.systemPrompt
-        } else {
-            config.systemPrompt.ifBlank { "" } + "\n\n" + extraSystemPrompt
-        }
+        // 构建系统提示（包含基础提示词、系统当前时间、附加提示如 MCP 工具说明）
+        val systemText = buildSystemPrompt(config.systemPrompt, extraSystemPrompt)
         val systemMessage = ApiMessage(role = "system", content = systemText)
         val fullMessages = listOf(systemMessage) + messages
 
@@ -320,6 +316,27 @@ class LlmApiService {
         }
     }
 
+    /**
+     * 返回系统当前时间（含时区），用于让模型感知实时时间。
+     */
+    private fun currentTimeString(): String {
+        val now = System.currentTimeMillis()
+        val sdf = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
+        return sdf.format(now) + "（" + java.util.TimeZone.getDefault().id + "）"
+    }
+
+    /**
+     * 构建系统提示：基础提示词 + 当前时间 + 附加提示（如 MCP 工具说明）。
+     */
+    private fun buildSystemPrompt(basePrompt: String, extraPrompt: String): String {
+        val timeInfo = "系统当前时间：" + currentTimeString()
+        return listOfNotNull(
+            basePrompt.ifBlank { null },
+            timeInfo,
+            extraPrompt.ifBlank { null }
+        ).joinToString("\n\n")
+    }
+
     // 非流式传输
     suspend fun sendChat(
         messages: List<ApiMessage>,
@@ -337,12 +354,8 @@ class LlmApiService {
             apiUrl = apiUrl.replace(modelNamePlaceholder, config.modelName)
         }
 
-        // 若提供了附加系统提示（如 MCP 工具说明），则合并到系统消息中
-        val systemText = if (extraSystemPrompt.isBlank()) {
-            config.systemPrompt
-        } else {
-            config.systemPrompt.ifBlank { "" } + "\n\n" + extraSystemPrompt
-        }
+        // 构建系统提示（包含基础提示词、系统当前时间、附加提示如 MCP 工具说明）
+        val systemText = buildSystemPrompt(config.systemPrompt, extraSystemPrompt)
         val systemMessage = ApiMessage(role = "system", content = systemText)
         val fullMessages = listOf(systemMessage) + messages
 
@@ -369,7 +382,8 @@ class LlmApiService {
         mcpServers: List<McpServer>,
         stream: Boolean = false,
         onChunk: (suspend (content: String, reasoningText: String?) -> Unit)? = null,
-        onToolStart: (suspend (serverName: String, toolName: String) -> Unit)? = null
+        onToolStart: (suspend (serverName: String, toolName: String) -> Unit)? = null,
+        onToolComplete: (suspend (completed: McpCallInfo) -> Unit)? = null
     ): ChatResult {
         val mcpClient = McpClient()
         val toolPrompt = StringBuilder()
@@ -489,12 +503,14 @@ class LlmApiService {
                 val result = mcpClient.callTool(server, call.tool, call.arguments)
                 val error = if (result.isError) result.text else null
                 val duration = System.currentTimeMillis() - startTime
-                collectedCalls += McpCallInfo(
+                val completed = McpCallInfo(
                     serverName = server.name,
                     toolName = call.tool,
                     durationMs = duration,
                     error = error
                 )
+                collectedCalls += completed
+                onToolComplete?.invoke(completed)
                 updatedMessages += ApiMessage(
                     role = "system",
                     content = "工具 \"${call.tool}\"（服务器 ${server.name}）返回结果：\n${result.text}"

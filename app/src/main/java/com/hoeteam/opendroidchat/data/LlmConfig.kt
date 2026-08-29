@@ -49,7 +49,7 @@ data class Message(
     val isThinkingStreaming: Boolean = false, // 思考内容是否仍在流式传输
     val selectedFile: SelectedFile? = null,
     val reasoningText: String? = null, // 思考内容（reasoning/reasoning_text）
-    val mcpCalls: List<McpCallInfo> = emptyList() // 本次回复中调用的 MCP 服务器工具记录
+    val segments: List<McpSegment> = emptyList() // 思考块与 MCP 调用按发生顺序堆叠
 )
 
 enum class Sender {

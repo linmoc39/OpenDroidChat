@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.hoeteam.opendroidchat.data.McpCallInfo
+import com.hoeteam.opendroidchat.data.McpSegment
 import com.hoeteam.opendroidchat.data.Message
 import com.hoeteam.opendroidchat.data.Sender
 import kotlinx.coroutines.delay
@@ -129,17 +130,20 @@ fun MessageBubble(
                     }
                 } else {
                     Column(modifier = Modifier.widthIn(min = 60.dp)) {
-                        // 思考内容展示（如果有）
+                        // 按发生顺序堆叠渲染思考块与 MCP 调用组
+                        message.segments.forEach { seg ->
+                            when (seg) {
+                                is McpSegment.Thinking -> ThinkingBlock(reasoningText = seg.text, isStreaming = false)
+                                is McpSegment.Calls -> if (seg.calls.isNotEmpty()) McpCallsBlock(calls = seg.calls)
+                            }
+                        }
+
+                        // 当前思考内容（进行中的思考）
                         if (!message.reasoningText.isNullOrBlank()) {
                             ThinkingBlock(
                                 reasoningText = message.reasoningText,
                                 isStreaming = message.isThinkingStreaming
                             )
-                        }
-
-                        // MCP 工具调用记录（如果有）
-                        if (message.mcpCalls.isNotEmpty()) {
-                            McpCallsBlock(calls = message.mcpCalls)
                         }
 
 
@@ -203,49 +207,49 @@ private fun ThinkingBlock(
 ) {
     var expanded by remember { mutableStateOf(true) }
 
-    Column(
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 16.dp)
+            .padding(horizontal = 12.dp, vertical = 6.dp)
     ) {
-        // 标题栏 - 可折叠
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { expanded = !expanded },
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
         ) {
-            Text(
-                text = if (isStreaming) stringResource(com.hoeteam.opendroidchat.R.string.message_thinking_in_progress) else stringResource(com.hoeteam.opendroidchat.R.string.message_thinking_complete),
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.tertiary
-            )
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            Icon(
-                imageVector = if (expanded) Icons.Default.KeyboardArrowDown else Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                modifier = Modifier.size(18.dp)
-            )
-        }
-
-        // 思考内容
-        AnimatedVisibility(visible = expanded) {
-            Surface(
-                shape = RoundedCornerShape(8.dp),
-                color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f),
+            // 标题栏 - 可折叠
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp)
+                    .clickable { expanded = !expanded },
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                Text(
+                    text = if (isStreaming) stringResource(com.hoeteam.opendroidchat.R.string.message_thinking_in_progress) else stringResource(com.hoeteam.opendroidchat.R.string.message_thinking_complete),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Icon(
+                    imageVector = if (expanded) Icons.Default.KeyboardArrowDown else Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+
+            // 思考内容
+            AnimatedVisibility(visible = expanded) {
                 Text(
                     text = reasoningText,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-                modifier = Modifier.padding(16.dp)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
+                    modifier = Modifier.padding(top = 8.dp)
                 )
             }
         }
