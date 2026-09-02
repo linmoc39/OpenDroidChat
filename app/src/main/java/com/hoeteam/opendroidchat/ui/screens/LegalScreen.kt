@@ -69,6 +69,7 @@ fun LegalScreen(
 
             // 免责声明
             Surface(
+                modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(28.dp),
                 color = MaterialTheme.colorScheme.surfaceContainerHigh,
                 tonalElevation = 2.dp
@@ -109,6 +110,7 @@ fun LegalScreen(
 
             // 知识产权
             Surface(
+                modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(28.dp),
                 color = MaterialTheme.colorScheme.surfaceContainerHigh,
                 tonalElevation = 2.dp

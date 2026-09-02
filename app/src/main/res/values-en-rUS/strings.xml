@@ -12,10 +12,13 @@
     <string name="chat_input_placeholder">Type a message…</string>
     <string name="chat_add_file">Add file</string>
     <string name="chat_send">Send</string>
+    <string name="chat_ai_disclaimer">Answers are AI-generated and for reference only</string>
     <string name="chat_remove_file">Remove file</string>
     <string name="chat_scroll_to_bottom">Scroll to bottom</string>
     <string name="chat_file_read_error">Unable to read this file or file type not supported</string>
     <string name="chat_retry">Retry</string>
+    <string name="chat_new_conversation">New conversation</string>
+    <string name="chat_empty_greeting">What would you like to chat about today?</string>
     <string name="chat_empty_config_title">No Model Configured</string>
     <string name="chat_empty_config_desc">Please add an LLM API instance to start chatting</string>
     <string name="chat_empty_config_button">Go to Model Management</string>
@@ -144,6 +147,11 @@
     <string name="message_thinking_in_progress">Thinking…</string>
     <string name="message_thinking_complete">Thinking complete</string>
     <string name="message_copied_to_clipboard">Copied to clipboard</string>
+    <string name="message_edit">Edit</string>
+    <string name="message_regenerate">Regenerate</string>
+    <string name="message_edit_save">Send</string>
+    <string name="message_edit_cancel">Cancel</string>
+    <string name="message_edit_placeholder">Edit or rewrite your message…</string>
 
     <!-- Loading Indicator -->
     <string name="loading_waiting_for_response">Waiting for LLM API response…</string>

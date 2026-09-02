@@ -24,6 +24,8 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.DoneAll
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -61,7 +63,15 @@ private fun copyToClipboard(context: Context, text: String) {
 @Composable
 fun MessageBubble(
     message: Message,
-    hybridMarkdown: @Composable (String, Modifier, Color) -> Unit
+    hybridMarkdown: @Composable (String, Modifier, Color) -> Unit,
+    isEditing: Boolean = false,
+    editingText: String = "",
+    onEditTextChange: (String) -> Unit = {},
+    onSaveEdit: () -> Unit = {},
+    onCancelEdit: () -> Unit = {},
+    onEdit: () -> Unit = {},
+    onRegenerate: () -> Unit = {},
+    isLoading: Boolean = false
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -69,11 +79,13 @@ fun MessageBubble(
 
     val isUser = message.sender == Sender.USER
     val bubbleColor = when {
+        isEditing -> MaterialTheme.colorScheme.surfaceContainerHigh
         isUser -> MaterialTheme.colorScheme.primary
         message.text.contains("LLM 响应出错") -> MaterialTheme.colorScheme.errorContainer
         else -> MaterialTheme.colorScheme.surfaceContainerHigh
     }
     val textColor = when {
+        isEditing -> MaterialTheme.colorScheme.onSurfaceVariant
         isUser -> MaterialTheme.colorScheme.onPrimary
         message.text.contains("LLM 响应出错") -> MaterialTheme.colorScheme.onErrorContainer
         else -> MaterialTheme.colorScheme.onSurfaceVariant
@@ -111,21 +123,52 @@ fun MessageBubble(
                     Column(
                         modifier = Modifier.widthIn(min = 60.dp)
                     ) {
-                        if (message.text.isNotBlank()) {
-                            Text(
-                                text = message.text,
-                                color = textColor,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                                style = MaterialTheme.typography.bodyLarge
+                        if (isEditing) {
+                            // 编辑模式：将聊天框变为输入框
+                            OutlinedTextField(
+                                value = editingText,
+                                onValueChange = onEditTextChange,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                                placeholder = { Text(stringResource(com.hoeteam.opendroidchat.R.string.message_edit_placeholder)) },
+                                singleLine = false,
+                                maxLines = 5
                             )
-                        }
-                        // 用户消息底部显示文件 Chip（如果有）
-                        if (message.selectedFile != null) {
-                            FileInfoChip(
-                                fileName = message.selectedFile.fileName,
-                                isCodeFile = message.selectedFile.isCodeFile,
-                                modifier = Modifier.padding(start = 12.dp, bottom = 8.dp, end = 12.dp)
-                            )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 8.dp, end = 8.dp, bottom = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.End
+                            ) {
+                                TextButton(onClick = onCancelEdit) {
+                                    Text(stringResource(com.hoeteam.opendroidchat.R.string.message_edit_cancel))
+                                }
+                                TextButton(
+                                    onClick = onSaveEdit,
+                                    enabled = editingText.isNotBlank() && !isLoading
+                                ) {
+                                    Text(stringResource(com.hoeteam.opendroidchat.R.string.message_edit_save))
+                                }
+                            }
+                        } else {
+                            if (message.text.isNotBlank()) {
+                                Text(
+                                    text = message.text,
+                                    color = textColor,
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                            }
+                            // 用户消息底部显示文件 Chip（如果有）
+                            if (message.selectedFile != null) {
+                                FileInfoChip(
+                                    fileName = message.selectedFile.fileName,
+                                    isCodeFile = message.selectedFile.isCodeFile,
+                                    modifier = Modifier.padding(start = 12.dp, bottom = 8.dp, end = 12.dp)
+                                )
+                            }
                         }
                     }
                 } else {
@@ -162,40 +205,91 @@ fun MessageBubble(
                 }
             }
 
-            // 复制按钮的 M3E 物理反馈
-            val interactionSource = remember { MutableInteractionSource() }
-            val isPressed by interactionSource.collectIsPressedAsState()
-            val buttonScale by animateFloatAsState(
-                targetValue = if (isPressed) 0.85f else 1f,
-                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium),
-                label = "CopyButtonScale"
-            )
-
-            IconButton(
-                onClick = {
-                    scope.launch {
-                        copyToClipboard(context, message.text)
-                        copyState = CopyState.Copied
-                        delay(2000)
-                        copyState = CopyState.Idle
-                    }
-                },
-                modifier = Modifier
-                    .padding(top = 2.dp)
-                    .size(36.dp)
-                    .scale(buttonScale),
-                interactionSource = interactionSource
+            // 消息下方操作按钮（编辑 / 重新生成 / 复制）
+            Row(
+                modifier = Modifier.padding(top = 2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
             ) {
-                Icon(
-                    imageVector = when (copyState) {
-                        CopyState.Idle -> Icons.Default.ContentCopy
-                        CopyState.Copied -> Icons.Default.DoneAll
+                // 用户消息：编辑按钮（点击后变为输入框进行修改/重写）
+                if (isUser && !isEditing && !isLoading) {
+                    MessageActionIconButton(
+                        onClick = onEdit
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Edit,
+                            contentDescription = stringResource(com.hoeteam.opendroidchat.R.string.message_edit),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+
+                // AI 消息：重新生成按钮
+                if (!isUser && !message.text.contains("LLM 响应出错") && !isLoading) {
+                    MessageActionIconButton(
+                        onClick = onRegenerate
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Refresh,
+                            contentDescription = stringResource(com.hoeteam.opendroidchat.R.string.message_regenerate),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+
+                // 复制按钮（带 M3E 物理反馈）
+                MessageActionIconButton(
+                    onClick = {
+                        scope.launch {
+                            copyToClipboard(context, message.text)
+                            copyState = CopyState.Copied
+                            delay(2000)
+                            copyState = CopyState.Idle
+                        }
                     },
-                    contentDescription = null,
-                    tint = if (copyState == CopyState.Copied) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                    modifier = Modifier.size(16.dp)
-                )
+                    modifier = Modifier.padding(top = 2.dp)
+                ) {
+                    Icon(
+                        imageVector = when (copyState) {
+                            CopyState.Idle -> Icons.Default.ContentCopy
+                            CopyState.Copied -> Icons.Default.DoneAll
+                        },
+                        contentDescription = null,
+                        tint = if (copyState == CopyState.Copied) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    )
+                }
             }
+        }
+    }
+}
+
+/**
+ * 消息下方操作按钮：每个按钮拥有独立的 interactionSource，
+ * 避免悬停/按压时多个按钮同时显示高亮或阴影。
+ */
+@Composable
+private fun MessageActionIconButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    icon: @Composable () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.85f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium),
+        label = "MessageActionScale"
+    )
+
+    IconButton(
+        onClick = onClick,
+        interactionSource = interactionSource,
+        modifier = modifier
+            .size(36.dp)
+            .scale(scale)
+    ) {
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.size(18.dp)) {
+            icon()
         }
     }
 }

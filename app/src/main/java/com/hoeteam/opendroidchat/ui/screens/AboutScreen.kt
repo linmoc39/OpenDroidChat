@@ -131,6 +131,7 @@ fun AboutScreen(
         ) {
             // 项目介绍
             Surface(
+                modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(28.dp),
                 color = MaterialTheme.colorScheme.surfaceContainerHigh,
                 tonalElevation = 2.dp
@@ -153,6 +154,7 @@ fun AboutScreen(
 
             // 版本信息卡片
             Surface(
+                modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(28.dp),
                 color = MaterialTheme.colorScheme.surfaceContainer,
                 tonalElevation = 1.dp

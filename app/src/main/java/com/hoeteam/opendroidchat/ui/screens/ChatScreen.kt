@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddComment
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -27,6 +28,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hoeteam.opendroidchat.R
@@ -51,6 +54,8 @@ fun ChatScreen(
     val inputText by viewModel.inputText.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val selectedFile by viewModel.selectedFile.collectAsState()
+    val editingMessageId by viewModel.editingMessageId.collectAsState()
+    val editingText by viewModel.editingText.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -171,6 +176,15 @@ fun ChatScreen(
                         style = MaterialTheme.typography.titleLarge
                     )
                 },
+                actions = {
+                    // 新建对话：清空当前会话并开始新对话
+                    IconButton(onClick = { viewModel.clearChat() }) {
+                        Icon(
+                            Icons.Filled.AddComment,
+                            contentDescription = stringResource(R.string.chat_new_conversation)
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
                     scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainerLow
@@ -178,19 +192,21 @@ fun ChatScreen(
             )
         },
         bottomBar = {
-            // 底部输入框在 M3E 中被赋予最高的视觉权重（已在组件中重构）
-            ChatInput(
-                text = inputText,
-                onTextChange = viewModel::updateInputText,
-                onSend = viewModel::sendMessage,
-                isLoading = isLoading,
-                selectedFile = selectedFile,
-                onAddFile = {
-                    val intent = createFilePickerIntent()
-                    filePickerLauncher.launch(intent)
-                },
-                onRemoveFile = viewModel::clearSelectedFile
-            )
+            // 空状态时输入框在内容区居中显示，因此这里隐藏底部输入框
+            if (messages.isNotEmpty()) {
+                ChatInput(
+                    text = inputText,
+                    onTextChange = viewModel::updateInputText,
+                    onSend = viewModel::sendMessage,
+                    isLoading = isLoading,
+                    selectedFile = selectedFile,
+                    onAddFile = {
+                        val intent = createFilePickerIntent()
+                        filePickerLauncher.launch(intent)
+                    },
+                    onRemoveFile = viewModel::clearSelectedFile
+                )
+            }
         },
         floatingActionButton = {
             val showFab by remember {
@@ -226,15 +242,54 @@ fun ChatScreen(
         }
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp), // 加大间距梯度
-                state = lazyListState
-            ) {
+            if (messages.isEmpty() && !isLoading) {
+                // 主页空状态：居中显示问候标题与输入框
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = stringResource(R.string.chat_empty_greeting),
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(32.dp))
+                    ChatInput(
+                        text = inputText,
+                        onTextChange = viewModel::updateInputText,
+                        onSend = viewModel::sendMessage,
+                        isLoading = isLoading,
+                        selectedFile = selectedFile,
+                        onAddFile = {
+                            val intent = createFilePickerIntent()
+                            filePickerLauncher.launch(intent)
+                        },
+                        onRemoveFile = viewModel::clearSelectedFile
+                    )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp), // 加大间距梯度
+                    state = lazyListState
+                ) {
                 items(messages, key = { it.id }) { message ->
                     MessageBubble(
                         message = message,
+                        isEditing = editingMessageId == message.id,
+                        editingText = editingText,
+                        onEditTextChange = viewModel::updateEditingText,
+                        onSaveEdit = { viewModel.saveEditedMessage(message.id) },
+                        onCancelEdit = viewModel::cancelEditing,
+                        onEdit = { viewModel.startEditing(message.id) },
+                        onRegenerate = { viewModel.regenerateMessage(message.id) },
+                        isLoading = isLoading,
                         hybridMarkdown = { text, modifier, textColor ->
                             HybridMarkdown(
                                 text = text,
@@ -260,6 +315,7 @@ fun ChatScreen(
                             LoadingIndicator()
                         }
                     }
+                }
                 }
             }
         }

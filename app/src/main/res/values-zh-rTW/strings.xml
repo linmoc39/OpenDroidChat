@@ -12,10 +12,13 @@
     <string name="chat_input_placeholder">輸入訊息…</string>
     <string name="chat_add_file">新增檔案</string>
     <string name="chat_send">傳送</string>
+    <string name="chat_ai_disclaimer">回答由AI生成，僅供參考</string>
     <string name="chat_remove_file">移除檔案</string>
     <string name="chat_scroll_to_bottom">到最底部</string>
     <string name="chat_file_read_error">無法讀取該檔案或檔案類型不支援</string>
     <string name="chat_retry">重試</string>
+    <string name="chat_new_conversation">新建對話</string>
+    <string name="chat_empty_greeting">今天想聊點什麼？</string>
     <string name="chat_empty_config_title">尚未設定模型</string>
     <string name="chat_empty_config_desc">請先新增一個 LLM API 例項以開始聊天</string>
     <string name="chat_empty_config_button">前往模型管理</string>
@@ -144,6 +147,11 @@
     <string name="message_thinking_in_progress">思考中…</string>
     <string name="message_thinking_complete">思考結束</string>
     <string name="message_copied_to_clipboard">已複製到剪貼簿</string>
+    <string name="message_edit">編輯</string>
+    <string name="message_regenerate">重新生成</string>
+    <string name="message_edit_save">傳送</string>
+    <string name="message_edit_cancel">取消</string>
+    <string name="message_edit_placeholder">修改或重寫你的訊息…</string>
 
     <!-- 載入指示器 -->
     <string name="loading_waiting_for_response">正在等待 LLM API 響應…</string>

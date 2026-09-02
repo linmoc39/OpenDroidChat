@@ -67,6 +67,13 @@ class ChatViewModel(
     private val _selectedFile = MutableStateFlow<SelectedFile?>(null)
     val selectedFile: StateFlow<SelectedFile?> = _selectedFile.asStateFlow()
 
+    // 消息编辑状态
+    private val _editingMessageId = MutableStateFlow<Long?>(null)
+    val editingMessageId: StateFlow<Long?> = _editingMessageId.asStateFlow()
+
+    private val _editingText = MutableStateFlow("")
+    val editingText: StateFlow<String> = _editingText.asStateFlow()
+
     // 缓存最近一次发送的 API 消息列表，用于重试
     private var lastApiMessages: List<ApiMessage> = emptyList()
 
@@ -82,6 +89,85 @@ class ChatViewModel(
 
     fun clearSelectedFile() {
         _selectedFile.value = null
+    }
+
+    // ------------------- 消息编辑 / 重新生成 -------------------
+
+    /**
+     * 开始编辑某条用户消息
+     */
+    fun startEditing(messageId: Long) {
+        val msg = _messages.value.find { it.id == messageId } ?: return
+        if (_isLoading.value) return
+        _editingMessageId.value = messageId
+        _editingText.value = msg.text
+    }
+
+    fun updateEditingText(newText: String) {
+        _editingText.value = newText
+    }
+
+    fun cancelEditing() {
+        _editingMessageId.value = null
+        _editingText.value = ""
+    }
+
+    /**
+     * 保存用户消息的修改，并截断其后内容重新发送给大语言模型
+     */
+    fun saveEditedMessage(messageId: Long) {
+        val currentModel = currentModel.value ?: return
+        val newText = _editingText.value.trim()
+        if (newText.isBlank() || _isLoading.value) return
+
+        val idx = _messages.value.indexOfFirst { it.id == messageId }
+        if (idx < 0) return
+
+        // 更新该用户消息的文本，并截断其后所有消息（重新生成后续内容）
+        _messages.update { list ->
+            val updated = list.toMutableList()
+            updated[idx] = updated[idx].copy(text = newText)
+            updated.subList(0, idx + 1)
+        }
+
+        _editingMessageId.value = null
+        _editingText.value = ""
+        _isLoading.value = true
+
+        viewModelScope.launch {
+            val apiMessages = buildApiMessages()
+            if (apiMessages.isEmpty()) {
+                _isLoading.value = false
+                return@launch
+            }
+            lastApiMessages = apiMessages
+            executeChatRequest(currentModel, apiMessages)
+        }
+    }
+
+    /**
+     * 让大语言模型重新生成指定 AI 消息（移除该消息及其后内容后重新请求）
+     */
+    fun regenerateMessage(messageId: Long) {
+        val currentModel = currentModel.value ?: return
+        if (_isLoading.value) return
+
+        val idx = _messages.value.indexOfFirst { it.id == messageId }
+        if (idx < 0) return
+
+        // 移除该 AI 消息及其后所有消息，保留其前内容
+        _messages.update { list -> list.subList(0, idx) }
+        _isLoading.value = true
+
+        viewModelScope.launch {
+            val apiMessages = buildApiMessages()
+            if (apiMessages.isEmpty()) {
+                _isLoading.value = false
+                return@launch
+            }
+            lastApiMessages = apiMessages
+            executeChatRequest(currentModel, apiMessages)
+        }
     }
 
     /**
@@ -424,6 +510,10 @@ class ChatViewModel(
     fun clearChat() {
         _messages.value = emptyList()
         lastApiMessages = emptyList()
+        _editingMessageId.value = null
+        _editingText.value = ""
+        _inputText.value = ""
+        _selectedFile.value = null
     }
 
     // ------------------- 模型配置逻辑 -------------------

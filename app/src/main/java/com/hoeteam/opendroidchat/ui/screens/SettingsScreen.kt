@@ -344,7 +344,7 @@ private fun SettingsListItem(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 2.dp)
+            .padding(horizontal = 16.dp, vertical = 2.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale

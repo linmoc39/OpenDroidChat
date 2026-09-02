@@ -100,19 +100,27 @@ fun McpServerListItem(
                 )
             )
 
-            IconButton(onClick = onEdit) {
+            IconButton(
+                onClick = onEdit,
+                modifier = Modifier.size(36.dp)
+            ) {
                 Icon(
                     Icons.Filled.Edit,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(18.dp)
                 )
             }
 
-            IconButton(onClick = { onDelete(server) }) {
+            IconButton(
+                onClick = { onDelete(server) },
+                modifier = Modifier.size(36.dp)
+            ) {
                 Icon(
                     Icons.Filled.Delete,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.error
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(18.dp)
                 )
             }
         }
